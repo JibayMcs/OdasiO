@@ -37,17 +37,17 @@ impl OceanBlocks {
     }
 }
 
-fn ocean_column(
-    cx: u32,
-    cz: u32,
-    height_chunks: usize,
+/// Remplit d'océan un rectangle de la colonne (`x0..x1`, `z0..z1` locaux).
+pub fn fill_ocean(
+    column: &mut Column,
+    (x0, x1): (usize, usize),
+    (z0, z1): (usize, usize),
     surface: usize,
     blocks: OceanBlocks,
-) -> Column {
-    let mut column = Column::new(cx, cz, height_chunks);
+) {
     let floor = surface.saturating_sub(DEPTH);
-    for z in 0..CHUNK_SIZE {
-        for x in 0..CHUNK_SIZE {
+    for z in z0..z1 {
+        for x in x0..x1 {
             column.set_block(x, 0, z, blocks.mantle);
             for y in 1..floor.saturating_sub(1) {
                 column.set_block(x, y, z, blocks.rock);
@@ -60,6 +60,23 @@ fn ocean_column(
             }
         }
     }
+}
+
+fn ocean_column(
+    cx: u32,
+    cz: u32,
+    height_chunks: usize,
+    surface: usize,
+    blocks: OceanBlocks,
+) -> Column {
+    let mut column = Column::new(cx, cz, height_chunks);
+    fill_ocean(
+        &mut column,
+        (0, CHUNK_SIZE),
+        (0, CHUNK_SIZE),
+        surface,
+        blocks,
+    );
     column
 }
 

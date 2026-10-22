@@ -313,6 +313,13 @@ impl IdResolver<'_> {
     }
 }
 
+/// Remplissage d'océan des quarts de colonne vides.
+#[derive(Debug, Clone, Copy)]
+struct OceanFill {
+    surface: usize,
+    blocks: ocean::OceanBlocks,
+}
+
 /// Fluide lumineux posé dans une colonne : x, y, z locaux et ID du fluide.
 type FluidLight = (usize, usize, usize, u32);
 
@@ -334,11 +341,14 @@ fn convert_region(
     origin: [i64; 2],
     top_rock: u32,
     light: Option<&LightTables>,
+    ocean: Option<OceanFill>,
 ) -> Result<RegionResult> {
     let mut region = Region::open(path)?;
     let height_chunks = (opts.map_size_y as usize) / CHUNK_SIZE;
     let height = opts.map_size_y as i32;
     let mut columns: HashMap<(u32, u32), Column> = HashMap::new();
+    // Chunks Minecraft présents dans chaque colonne : un bit par quart (2 x 2 chunks).
+    let mut quarters: HashMap<(u32, u32), u8> = HashMap::new();
     // Fluides lumineux (lave) : seule leur surface est déclarée au jeu, la lumière se
     // propage ensuite d'elle-même.
     let mut fluid_lights: HashMap<(u32, u32), Vec<FluidLight>> = HashMap::new();
@@ -379,6 +389,7 @@ fn convert_region(
         }
         let key = ((vs_x / 32) as u32, (vs_z / 32) as u32);
         let (ox, oz) = ((vs_x % 32) as usize, (vs_z % 32) as usize);
+        *quarters.entry(key).or_default() |= 1 << ((ox / 16) + 2 * (oz / 16));
         let column = columns
             .entry(key)
             .or_insert_with(|| Column::new(key.0, key.1, height_chunks));
@@ -466,6 +477,22 @@ fn convert_region(
     }
 
     let mut columns: Vec<Column> = columns.into_values().collect();
+    // Les chunks Minecraft absents d'une colonne deviennent de l'océan.
+    if let Some(fill) = ocean {
+        for column in &mut columns {
+            let mask = quarters.get(&(column.cx, column.cz)).copied().unwrap_or(0);
+            for quarter in (0..4).filter(|q| mask & (1 << q) == 0) {
+                let (x0, z0) = ((quarter % 2) * 16, (quarter / 2) * 16);
+                ocean::fill_ocean(
+                    column,
+                    (x0, x0 + 16),
+                    (z0, z0 + 16),
+                    fill.surface,
+                    fill.blocks,
+                );
+            }
+        }
+    }
     for column in &mut columns {
         let key = (column.cx, column.cz);
         for (x, y, z, id) in fluid_lights.remove(&key).unwrap_or_default() {
@@ -583,6 +610,15 @@ pub fn convert(
         .get(&format!("game:rock-{}", mapping.settings.rock))
         .copied()
         .unwrap_or(0);
+    // Dernière couche d'eau : celle de la mer Minecraft (Y = 62) une fois décalée.
+    let ocean_surface =
+        (MC_SEA_LEVEL - 1 + opts.y_offset).clamp(1, opts.map_size_y as i32 - 1) as usize;
+    // Les quarts de colonne sans chunk Minecraft (bordure de la zone générée) seraient des
+    // puits jusqu'au fond du monde : ils deviennent de l'océan, quel que soit le type de monde.
+    let ocean_fill = Some(OceanFill {
+        surface: ocean_surface,
+        blocks: ocean::OceanBlocks::from_ids(&ids, top_rock),
+    });
     db.clear_terrain()?;
 
     let missing = Mutex::new(BTreeMap::new());
@@ -611,6 +647,7 @@ pub fn convert(
                         origin,
                         top_rock,
                         light_tables.as_ref(),
+                        ocean_fill,
                     ));
                 },
             );
@@ -640,13 +677,10 @@ pub fn convert(
             surfaces.iter().map(|(key, _)| *key).collect();
         let center = (MAP_CENTER / CHUNK_SIZE as i64) as u32;
         let holes = ocean::holes(&written, (center, center));
-        // Dernière couche d'eau : celle de la mer Minecraft (Y = 62) une fois décalée.
-        let surface =
-            (MC_SEA_LEVEL - 1 + opts.y_offset).clamp(1, opts.map_size_y as i32 - 1) as usize;
         let columns = ocean::ocean_columns(
             &holes,
             opts.map_size_y as usize / CHUNK_SIZE,
-            surface,
+            ocean_surface,
             ocean::OceanBlocks::from_ids(&ids, top_rock),
             light_tables.as_ref(),
             top_rock,
