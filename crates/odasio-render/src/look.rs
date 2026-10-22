@@ -98,6 +98,22 @@ impl BlockLook {
         }
     }
 
+    /// Couleur moyenne vue du dessus (texture du dessus teintée), pour les cartes.
+    pub fn map_color(&self) -> [u8; 3] {
+        let t = &self.top.texture;
+        let (mut sum, mut weight) = ([0u64; 3], 0u64);
+        for p in t.rgba.chunks_exact(4) {
+            let a = p[3] as u64;
+            for k in 0..3 {
+                sum[k] += p[k] as u64 * a;
+            }
+            weight += a;
+        }
+        let tint = self.top.tint.unwrap_or([255; 3]);
+        let weight = weight.max(1);
+        [0, 1, 2].map(|k| (sum[k] / weight * tint[k] as u64 / 255) as u8)
+    }
+
     pub fn single(shape: Shape, face: Face) -> Self {
         Self {
             shape,

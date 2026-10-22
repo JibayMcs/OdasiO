@@ -219,6 +219,16 @@ const SHADE_TOP: f32 = 1.0;
 const SHADE_SOUTH: f32 = 0.8;
 const SHADE_EAST: f32 = 0.64;
 
+/// Position dans l'image rendue d'un point (coordonnées continues) de la scène.
+pub fn project(scene: &Scene, a: f32, x: f32, y: f32, z: f32) -> [f32; 2] {
+    Projection {
+        a,
+        origin_x: scene.size_z as f32 * a + 1.0,
+        origin_y: scene.size_y as f32 * a + 1.0,
+    }
+    .point(x, y, z)
+}
+
 /// Contour à l'écran (hexagone, en pixels de l'image rendue) du bloc (`x`, `y`, `z`) de la
 /// scène, pour surligner une sélection.
 pub fn block_outline(scene: &Scene, a: f32, x: usize, y: usize, z: usize) -> [[f32; 2]; 6] {

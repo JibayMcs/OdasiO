@@ -89,6 +89,7 @@ pub struct OdasioApp {
     pub mapping_rev: u64,
     pub mapping_view: views::mapping::ViewState,
     pub preview: views::preview::ViewState,
+    window_fitted: bool,
     pub form: ConvertForm,
     pub convert: Option<Task<Arc<ConvertReport>>>,
 }
@@ -112,6 +113,7 @@ impl OdasioApp {
             mapping_rev: 0,
             mapping_view: Default::default(),
             preview: Default::default(),
+            window_fitted: false,
             form: ConvertForm {
                 world_name: String::new(),
                 output: PathBuf::new(),
@@ -126,6 +128,25 @@ impl OdasioApp {
             },
             convert: None,
         }
+    }
+
+    /// Au premier affichage : fenêtre à 80 % de l'écran (bornée), centrée.
+    fn fit_window(&mut self, ctx: &egui::Context) {
+        if self.window_fitted {
+            return;
+        }
+        let Some(monitor) = ctx.input(|i| i.viewport().monitor_size) else {
+            return;
+        };
+        self.window_fitted = true;
+        let size = egui::vec2(
+            (monitor.x * 0.8).clamp(960.0, 1920.0).min(monitor.x),
+            (monitor.y * 0.85).clamp(680.0, 1200.0).min(monitor.y),
+        );
+        ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
+        ctx.send_viewport_cmd(egui::ViewportCommand::OuterPosition(
+            ((monitor - size) / 2.0).to_pos2(),
+        ));
     }
 
     /// Hauteur et décalage effectifs de la conversion.
@@ -161,6 +182,7 @@ impl OdasioApp {
                 });
                 self.convert = None;
                 self.start_scan(ctx);
+                views::preview::prefetch(self, ctx);
                 self.step = Step::Analysis;
             }
             Err(e) => self.world_error = Some(format!("{}\n{e}", path.display())),
@@ -311,6 +333,7 @@ impl OdasioApp {
 
 impl eframe::App for OdasioApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.fit_window(ctx);
         self.refresh_plan();
         let p = Palette::of_ctx(ctx);
 
@@ -337,20 +360,22 @@ impl eframe::App for OdasioApp {
                     .inner_margin(egui::Margin::symmetric(16, 0)),
             )
             .show(ctx, |ui| {
+                // L'aperçu occupe toute la fenêtre et gère lui-même la souris (pas de
+                // défilement de page).
+                if self.step == Step::Preview && self.direction == Direction::ToVintageStory {
+                    ui.add_space(14.0);
+                    views::preview::show(self, ui);
+                    return;
+                }
                 egui::ScrollArea::vertical()
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
                         ui.add_space(20.0);
-                        // Contenu centré, largeur bornée : lisible sur grand écran,
-                        // pleine largeur sur petite fenêtre.
-                        // L'aperçu, côte à côte, profite de toute la largeur.
-                        let max = if self.step == Step::Preview {
-                            f32::INFINITY
-                        } else {
-                            theme::CONTENT_MAX
-                        };
-                        let width = ui.available_width().min(max);
-                        let margin = ((ui.available_width() - width) / 2.0).max(0.0);
+                        // Contenu centré, largeur bornée mais qui grandit avec la fenêtre :
+                        // lisible sur grand écran, pleine largeur sur petite fenêtre.
+                        let full = ui.available_width();
+                        let width = full.min(theme::CONTENT_MAX.max(full * 0.72).min(1500.0));
+                        let margin = ((full - width) / 2.0).max(0.0);
                         ui.horizontal(|ui| {
                             ui.add_space(margin);
                             ui.vertical(|ui| {
@@ -373,7 +398,7 @@ impl eframe::App for OdasioApp {
                                     Step::World => views::world::show(self, ui),
                                     Step::Analysis => views::analysis::show(self, ui),
                                     Step::Mapping => views::mapping::show(self, ui),
-                                    Step::Preview => views::preview::show(self, ui),
+                                    Step::Preview => {}
                                     Step::Options => views::options::show(self, ui),
                                     Step::Convert => views::convert::show(self, ui),
                                 }
