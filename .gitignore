@@ -2,3 +2,5 @@
 *.vcdbs
 *.vcdbs-journal
 /test-worlds
+/.ideuh/
+/.conversations/
