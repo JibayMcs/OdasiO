@@ -18,7 +18,7 @@ jobs:
     name: Linux (.deb et archive)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Version
@@ -46,7 +46,7 @@ jobs:
           cp README.md README.fr.md LICENSE-MIT LICENSE-APACHE packaging/linux/odasio.desktop "$DIR/"
           cp packaging/icons/hicolor/256x256/apps/odasio.png "$DIR/"
           tar czf "dist/${DIR}.tar.gz" "$DIR"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux
           path: dist/*
@@ -55,7 +55,7 @@ jobs:
     name: Windows (installateur)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Version
@@ -72,7 +72,7 @@ jobs:
           }
           & $iscc "/DAppVersion=$env:VERSION" "/DSourceDir=$env:GITHUB_WORKSPACE\target\release" packaging\windows\odasio.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: dist/*.exe
@@ -82,7 +82,7 @@ jobs:
     needs: [linux, windows]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
