@@ -53,6 +53,27 @@ pub enum WorldType {
     Standard,
 }
 
+/// Niveau de la mer d'un monde VS standard (`TerraGenConfig.seaLevel`).
+pub fn vs_sea_level(map_size_y: u32) -> i32 {
+    (0.4313725490196078 * map_size_y as f64) as i32
+}
+
+/// Niveau de la mer de Minecraft.
+pub const MC_SEA_LEVEL: i32 = 63;
+
+/// Hauteur et décalage d'un monde standard : les mers Minecraft et Vintage Story sont au même
+/// niveau, et la plus petite hauteur qui contient toute la plage verticale occupée est retenue.
+pub fn standard_layout(y_range: Option<(i32, i32)>) -> (u32, i32) {
+    let (low, high) = y_range.unwrap_or((-64, 319));
+    for height in [320u32, 384, 448, 512] {
+        let offset = vs_sea_level(height) - MC_SEA_LEVEL;
+        if low + offset >= 0 && high + offset < height as i32 {
+            return (height, offset);
+        }
+    }
+    (512, vs_sea_level(512) - MC_SEA_LEVEL)
+}
+
 impl WorldType {
     pub fn code(self) -> &'static str {
         match self {
@@ -589,5 +610,27 @@ fn choose_spawn(
             ]
         }
         None => [target.0 as i32, opts.y_offset + 80, target.1 as i32],
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sea_levels_match_the_game() {
+        assert_eq!(vs_sea_level(256), 110);
+        assert_eq!(vs_sea_level(384), 165);
+    }
+
+    #[test]
+    fn standard_layout_aligns_seas_and_fits_the_world() {
+        // riveciel : de -64 à 207.
+        let (height, offset) = standard_layout(Some((-64, 207)));
+        assert_eq!((height, offset), (320, 75));
+        assert_eq!(MC_SEA_LEVEL + offset, vs_sea_level(height));
+        // Monde utilisant toute la hauteur 1.18+ : il faut monter plus haut.
+        let (height, offset) = standard_layout(Some((-64, 319)));
+        assert!(319 + offset < height as i32 && -64 + offset >= 0);
     }
 }

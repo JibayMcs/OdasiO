@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use eframe::egui::{self, Align, Layout, RichText, Stroke, Ui};
 use odasio_core::mc::World;
-use odasio_core::{ConversionPlan, ConvertReport, Inventory, Mapping};
+use odasio_core::{ConversionPlan, ConvertReport, Inventory, Mapping, WorldType};
 
 use crate::recent::Recent;
 use crate::task::Task;
@@ -54,6 +54,9 @@ pub struct ConvertForm {
     pub overwrite: bool,
     pub map_size_y: u32,
     pub y_offset: i32,
+    pub world_type: WorldType,
+    /// Monde standard : hauteur et décalage calculés pour aligner les mers.
+    pub auto_layout: bool,
 }
 
 pub struct OdasioApp {
@@ -93,8 +96,19 @@ impl OdasioApp {
                 overwrite: false,
                 map_size_y: 384,
                 y_offset: 64,
+                world_type: WorldType::Standard,
+                auto_layout: true,
             },
             convert: None,
+        }
+    }
+
+    /// Hauteur et décalage effectifs de la conversion.
+    pub fn layout(&self) -> (u32, i32) {
+        if self.form.world_type == WorldType::Standard && self.form.auto_layout {
+            odasio_core::standard_layout(self.inventory().and_then(|i| i.y_range))
+        } else {
+            (self.form.map_size_y, self.form.y_offset)
         }
     }
 

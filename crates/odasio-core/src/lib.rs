@@ -8,7 +8,10 @@ pub mod mapping;
 pub mod paths;
 pub mod plan;
 
-pub use convert::{ConvertOptions, ConvertReport, Lighting, Progress, WorldType, convert};
+pub use convert::{
+    ConvertOptions, ConvertReport, Lighting, Progress, WorldType, convert, standard_layout,
+    vs_sea_level,
+};
 pub use inventory::Inventory;
 pub use mapping::{Action, Category, Mapping, Policy, Quality, Resolved};
 pub use odasio_mc as mc;

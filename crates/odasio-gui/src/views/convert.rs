@@ -37,8 +37,8 @@ fn start(app: &mut OdasioApp, ctx: &egui::Context) {
     opts.dimension = loaded.dimension.clone();
     opts.world_name = app.form.world_name.trim().to_string();
     opts.overwrite = overwrite;
-    opts.map_size_y = app.form.map_size_y;
-    opts.y_offset = app.form.y_offset;
+    (opts.map_size_y, opts.y_offset) = app.layout();
+    opts.world_type = app.form.world_type;
     let mapping = app.mapping.clone();
 
     app.convert = Some(Task::spawn(ctx, "Préparation...", move |r| {

@@ -94,12 +94,14 @@ enum Command {
         /// Roche VS utilisée pour la pierre Minecraft
         #[arg(long)]
         rock: Option<String>,
-        /// Hauteur du monde VS (multiple de 32)
-        #[arg(long, default_value_t = 384)]
-        height: u32,
-        /// Décalage vertical ajouté au Y Minecraft
-        #[arg(long, default_value_t = 64)]
-        y_offset: i32,
+        /// Hauteur du monde VS (multiple de 32). Par défaut : 384 en superflat ; en monde
+        /// standard, la plus petite hauteur qui contient le monde, mers alignées
+        #[arg(long)]
+        height: Option<u32>,
+        /// Décalage vertical ajouté au Y Minecraft. Par défaut : 64 en superflat ; en monde
+        /// standard, aligne le niveau de la mer Minecraft sur celui de Vintage Story
+        #[arg(long)]
+        y_offset: Option<i32>,
         /// Terrain autour de la zone convertie
         #[arg(long, value_enum, default_value_t = WorldTypeArg::Superflat)]
         world_type: WorldTypeArg,
@@ -167,12 +169,30 @@ fn main() -> Result<()> {
             opts.overwrite = force;
             opts.template = template;
             opts.dimension = dimension;
-            opts.map_size_y = height;
-            opts.y_offset = y_offset;
             opts.world_type = match world_type {
                 WorldTypeArg::Superflat => WorldType::Superflat,
                 WorldTypeArg::Standard => WorldType::Standard,
             };
+            if opts.world_type == WorldType::Standard && (height.is_none() || y_offset.is_none()) {
+                let args = WorldArgs {
+                    world: world.clone(),
+                    dimension: opts.dimension.clone(),
+                    regions: None,
+                };
+                let (auto_height, auto_offset) =
+                    odasio_core::standard_layout(load_inventory(&args)?.y_range);
+                opts.map_size_y = height.unwrap_or(auto_height);
+                opts.y_offset = y_offset.unwrap_or(auto_offset);
+                println!(
+                    "Monde standard : hauteur {}, décalage {:+} (mer Minecraft Y = 63 -> Y = {})\n",
+                    opts.map_size_y,
+                    opts.y_offset,
+                    63 + opts.y_offset
+                );
+            } else {
+                opts.map_size_y = height.unwrap_or(384);
+                opts.y_offset = y_offset.unwrap_or(64);
+            }
             opts.lighting = match lighting {
                 LightingArg::Odasio => Lighting::Odasio,
                 LightingArg::Game => Lighting::Game,
@@ -222,6 +242,9 @@ fn load_inventory(args: &WorldArgs) -> Result<Inventory> {
         inventory.errors,
         started.elapsed()
     );
+    if let Some((low, high)) = inventory.y_range {
+        println!("Plage verticale occupée : Y = {low} à {high}");
+    }
     for (v, n) in &inventory.unsupported {
         println!("  format non supporté : DataVersion {v}, {n} chunks");
     }

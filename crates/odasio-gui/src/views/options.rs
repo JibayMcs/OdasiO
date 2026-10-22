@@ -1,7 +1,7 @@
 //! Étape 4 : réglages du monde Vintage Story produit.
 
 use eframe::egui::{self, RichText, Ui};
-use odasio_core::paths;
+use odasio_core::{WorldType, paths};
 
 use crate::app::OdasioApp;
 use crate::theme::{self, Palette};
@@ -100,28 +100,75 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
 
                 row(
                     ui,
-                    "Hauteur du monde",
-                    "384 couvre toute la hauteur d'un monde Minecraft 1.18+ (de -64 à 319).",
+                    "Terrain environnant",
+                    "Ce que Vintage Story génère autour de votre monde.",
                     |ui| {
-                        egui::ComboBox::from_id_salt("height")
-                            .selected_text(app.form.map_size_y.to_string())
-                            .width(120.0)
-                            .show_ui(ui, |ui| {
-                                for h in [256u32, 320, 384, 448, 512] {
-                                    ui.selectable_value(&mut app.form.map_size_y, h, h.to_string());
-                                }
-                            });
+                        ui.radio_value(
+                            &mut app.form.world_type,
+                            WorldType::Standard,
+                            "Standard : relief, climat, saisons et végétation de Vintage Story (recommandé)",
+                        );
+                        ui.radio_value(
+                            &mut app.form.world_type,
+                            WorldType::Superflat,
+                            "Superflat : une plaine plate",
+                        );
                     },
                 );
 
-                row(
-                    ui,
-                    "Décalage vertical",
-                    "Ajouté au Y Minecraft. 64 place le fond d'un monde 1.18+ (Y = -64) au fond du monde VS.",
-                    |ui| {
-                        ui.add(egui::DragValue::new(&mut app.form.y_offset).range(-256..=256).speed(1));
-                    },
-                );
+                let standard = app.form.world_type == WorldType::Standard;
+                if standard {
+                    let (height, offset) = odasio_core::standard_layout(
+                        app.inventory().and_then(|i| i.y_range),
+                    );
+                    row(
+                        ui,
+                        "Hauteur et niveau",
+                        "La mer de votre monde est placée au niveau de la mer de Vintage Story.",
+                        |ui| {
+                            ui.checkbox(&mut app.form.auto_layout, "Automatique");
+                            if app.form.auto_layout {
+                                ui.label(
+                                    RichText::new(format!(
+                                        "Hauteur {height}, décalage {offset:+} : la mer (Y = 63) arrive à Y = {}.",
+                                        63 + offset
+                                    ))
+                                    .color(p.muted),
+                                );
+                            } else if app.form.map_size_y == 384 && app.form.y_offset == 64 {
+                                // Point de départ des réglages manuels : la proposition automatique.
+                                app.form.map_size_y = height;
+                                app.form.y_offset = offset;
+                            }
+                        },
+                    );
+                }
+
+                if !standard || !app.form.auto_layout {
+                    row(
+                        ui,
+                        "Hauteur du monde",
+                        "Multiple de 32. 384 couvre toute la hauteur d'un monde Minecraft 1.18+.",
+                        |ui| {
+                            egui::ComboBox::from_id_salt("height")
+                                .selected_text(app.form.map_size_y.to_string())
+                                .width(120.0)
+                                .show_ui(ui, |ui| {
+                                    for h in [256u32, 320, 384, 448, 512] {
+                                        ui.selectable_value(&mut app.form.map_size_y, h, h.to_string());
+                                    }
+                                });
+                        },
+                    );
+                    row(
+                        ui,
+                        "Décalage vertical",
+                        "Ajouté au Y Minecraft. 64 place le fond d'un monde 1.18+ (Y = -64) au fond du monde VS.",
+                        |ui| {
+                            ui.add(egui::DragValue::new(&mut app.form.y_offset).range(-256..=256).speed(1));
+                        },
+                    );
+                }
             });
     });
 }

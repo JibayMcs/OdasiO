@@ -19,6 +19,8 @@ pub struct Inventory {
     /// Chunks dans un format non supporté, par DataVersion.
     pub unsupported: BTreeMap<i32, usize>,
     pub errors: usize,
+    /// Plus bas et plus haut Y Minecraft occupés par un bloc autre que l'air.
+    pub y_range: Option<(i32, i32)>,
 }
 
 impl Inventory {
@@ -55,6 +57,7 @@ impl Inventory {
                                 Ok(Some(chunk)) if chunk.complete => {
                                     inv.chunks += 1;
                                     count_blocks(&chunk, &mut inv.counts);
+                                    inv.y_range = merge_range(inv.y_range, y_range(&chunk));
                                 }
                                 Ok(Some(_)) => inv.incomplete_chunks += 1,
                                 Ok(None) => {}
@@ -91,8 +94,36 @@ impl Inventory {
         self.chunks += other.chunks;
         self.incomplete_chunks += other.incomplete_chunks;
         self.errors += other.errors;
+        self.y_range = merge_range(self.y_range, other.y_range);
         self
     }
+}
+
+fn merge_range(a: Option<(i32, i32)>, b: Option<(i32, i32)>) -> Option<(i32, i32)> {
+    match (a, b) {
+        (Some(a), Some(b)) => Some((a.0.min(b.0), a.1.max(b.1))),
+        (a, b) => a.or(b),
+    }
+}
+
+/// Plage verticale occupée d'un chunk, au bloc près.
+fn y_range(chunk: &Chunk) -> Option<(i32, i32)> {
+    let occupied = |section: &odasio_mc::Section, layer: usize| {
+        (0..256).any(|i| !section.block(i % 16, layer, i / 16).is_air())
+    };
+    let sections: Vec<_> = chunk.sections.iter().filter(|s| !s.is_empty()).collect();
+    let low = sections.iter().find_map(|s| {
+        (0..16)
+            .find(|&layer| occupied(s, layer))
+            .map(|layer| s.y as i32 * 16 + layer as i32)
+    })?;
+    let high = sections.iter().rev().find_map(|s| {
+        (0..16)
+            .rev()
+            .find(|&layer| occupied(s, layer))
+            .map(|layer| s.y as i32 * 16 + layer as i32)
+    })?;
+    Some((low, high))
 }
 
 fn count_blocks(chunk: &Chunk, counts: &mut HashMap<BlockState, u64>) {
