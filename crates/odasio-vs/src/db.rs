@@ -63,6 +63,23 @@ impl VsDatabase {
             .optional()?)
     }
 
+    /// Toutes les colonnes du monde : (cx, cz, blob du map chunk).
+    pub fn map_chunks(&self) -> Result<Vec<(u32, u32, Vec<u8>)>> {
+        let mut stmt = self.conn.prepare("SELECT position, data FROM mapchunk")?;
+        let rows = stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, Vec<u8>>(1)?)))?;
+        let mut out = Vec::new();
+        for row in rows {
+            let (key, data) = row?;
+            let key = key as u64;
+            out.push((
+                (key & 0x3F_FFFF) as u32,
+                ((key >> 27) & 0x3F_FFFF) as u32,
+                data,
+            ));
+        }
+        Ok(out)
+    }
+
     pub fn chunk_count(&self) -> Result<i64> {
         Ok(self
             .conn

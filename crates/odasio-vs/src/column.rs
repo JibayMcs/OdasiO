@@ -133,7 +133,12 @@ impl Column {
                 .bytes(2, &[])
                 .bytes(3, &[])
                 .string(12, TARGET_GAME_VERSION)
-                .uint(15, 2)
+                // Version 1 : même codec que la 2, mais le jeu « met à niveau » le chunk au
+                // premier dépaquetage (UpdateForVersion), ce qui le marque à sauvegarder et
+                // force sa recompression. Sans cela, la lumière calculée par le jeu peut être
+                // perdue : le chunk est réenregistré avec nos données d'origine, sans lumière,
+                // alors que la colonne est déjà marquée terminée.
+                .uint(15, 1)
                 .bytes(16, &layer::encode(fluids)?);
             if is_empty {
                 w.bool(13, true);
@@ -222,7 +227,7 @@ mod tests {
         assert!(
             fields
                 .iter()
-                .any(|f| f.number == 15 && f.value.as_u64() == Some(2))
+                .any(|f| f.number == 15 && f.value.as_u64() == Some(1))
         );
 
         let map: Vec<_> = ProtoReader::new(&encoded.map_chunk)

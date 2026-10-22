@@ -65,6 +65,11 @@ enum Command {
         /// Position Z d'un bloc de la colonne
         z: u32,
     },
+    /// Diagnostic d'une sauvegarde Vintage Story : passes de génération et éclairage
+    Audit {
+        /// Fichier .vcdbs
+        save: PathBuf,
+    },
     /// Convertit une dimension Minecraft en monde Vintage Story
     Convert {
         /// Dossier du monde Minecraft (contient level.dat)
@@ -113,6 +118,7 @@ fn main() -> Result<()> {
         Command::Scan { world, top, out } => scan(&world, top, out.as_deref())?,
         Command::Plan { world, rock, top } => plan(&world, rock.as_deref(), top)?,
         Command::Inspect { save, x, z } => inspect(&save, x / 32, z / 32)?,
+        Command::Audit { save } => audit(&save)?,
         Command::Convert {
             world,
             name,
@@ -404,6 +410,81 @@ fn inspect(save: &Path, cx: u32, cz: u32) -> Result<()> {
                 "air".to_string()
             } else {
                 summary.join(", ")
+            }
+        );
+    }
+    Ok(())
+}
+
+fn audit(save: &Path) -> Result<()> {
+    use odasio_core::vs::{VsDatabase, layer, proto::ProtoReader};
+    use std::collections::BTreeMap;
+
+    let db = VsDatabase::open(save)?;
+    let mut passes: BTreeMap<u64, usize> = BTreeMap::new();
+    // Colonnes déjà éclairées par le jeu dont le chunk de surface n'a pas de lumière.
+    let mut dark = Vec::new();
+    let columns = db.map_chunks()?;
+    for (cx, cz, map) in &columns {
+        let mut pass = 0;
+        let mut y_max = 0;
+        for field in ProtoReader::new(map) {
+            let field = field?;
+            match field.number {
+                4 => pass = field.value.as_u64().unwrap_or(0),
+                10 => y_max = field.value.as_u64().unwrap_or(0),
+                _ => {}
+            }
+        }
+        *passes.entry(pass).or_default() += 1;
+        // À partir de la passe 4, l'éclairage de la passe Végétation doit être enregistré.
+        if pass < 4 {
+            continue;
+        }
+        // Chunk juste au-dessus de la surface : il doit recevoir le soleil.
+        let cy = ((y_max + 1) / 32) as u32;
+        let Some(blob) = db.read_chunk(*cx, cy.min(db.save.map_size[1] / 32 - 1), *cz)? else {
+            continue;
+        };
+        let (mut planes, mut palette): (&[u8], &[u8]) = (&[], &[]);
+        for field in ProtoReader::new(&blob) {
+            let field = field?;
+            match field.number {
+                2 => planes = field.value.as_bytes().unwrap_or_default(),
+                3 => palette = field.value.as_bytes().unwrap_or_default(),
+                _ => {}
+            }
+        }
+        let sun = layer::decode_light(planes, palette)?
+            .map(|cells| cells.iter().map(|v| v & 31).max().unwrap_or(0));
+        if sun.unwrap_or(0) == 0 {
+            dark.push((*cx, *cz, sun.is_some()));
+        }
+    }
+    println!("{} colonnes", columns.len());
+    for (pass, n) in &passes {
+        let label = match pass {
+            3 => "à éclairer par le jeu",
+            6 => "terminée",
+            _ => "intermédiaire",
+        };
+        println!("  passe {pass} ({label}) : {n}");
+    }
+    println!(
+        "{} colonnes éclairées par le jeu (passe 4 ou plus) sans soleil en surface",
+        dark.len()
+    );
+    let unlit = dark.iter().filter(|d| !d.2).count();
+    println!("  dont {unlit} sans aucune couche de lumière");
+    for (cx, cz, has_layer) in dark.iter().take(15) {
+        println!(
+            "  colonne {cx},{cz} (bloc {} {}) {}",
+            cx * 32,
+            cz * 32,
+            if *has_layer {
+                "lumière à 0"
+            } else {
+                "pas de lumière"
             }
         );
     }
