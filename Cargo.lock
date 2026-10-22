@@ -2687,6 +2687,7 @@ dependencies = [
  "egui_extras",
  "image",
  "odasio-core",
+ "odasio-render",
  "rfd",
  "sys-locale",
  "toml 0.8.23",

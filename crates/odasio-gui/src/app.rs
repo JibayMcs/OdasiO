@@ -16,15 +16,17 @@ pub enum Step {
     World,
     Analysis,
     Mapping,
+    Preview,
     Options,
     Convert,
 }
 
 impl Step {
-    pub const ALL: [Step; 5] = [
+    pub const ALL: [Step; 6] = [
         Step::World,
         Step::Analysis,
         Step::Mapping,
+        Step::Preview,
         Step::Options,
         Step::Convert,
     ];
@@ -34,6 +36,7 @@ impl Step {
             Step::World => "step.world",
             Step::Analysis => "step.analysis",
             Step::Mapping => "step.mapping",
+            Step::Preview => "step.preview",
             Step::Options => "step.options",
             Step::Convert => "step.convert",
         })
@@ -81,7 +84,11 @@ pub struct OdasioApp {
     pub mapping: Mapping,
     pub plan: Option<ConversionPlan>,
     pub plan_dirty: bool,
+    /// Incrémenté à chaque reconstruction du plan : les vues qui dépendent des
+    /// correspondances (aperçu) se mettent à jour.
+    pub mapping_rev: u64,
     pub mapping_view: views::mapping::ViewState,
+    pub preview: views::preview::ViewState,
     pub form: ConvertForm,
     pub convert: Option<Task<Arc<ConvertReport>>>,
 }
@@ -102,7 +109,9 @@ impl OdasioApp {
             mapping: Mapping::builtin(),
             plan: None,
             plan_dirty: false,
+            mapping_rev: 0,
             mapping_view: Default::default(),
+            preview: Default::default(),
             form: ConvertForm {
                 world_name: String::new(),
                 output: PathBuf::new(),
@@ -187,7 +196,16 @@ impl OdasioApp {
         if let Some(inventory) = self.inventory() {
             self.plan = Some(ConversionPlan::build(&self.mapping, &inventory));
             self.plan_dirty = false;
+            self.mapping_rev += 1;
         }
+    }
+
+    /// Étapes du sens de conversion choisi (l'aperçu n'existe que vers Vintage Story).
+    fn steps(&self) -> Vec<Step> {
+        Step::ALL
+            .into_iter()
+            .filter(|s| *s != Step::Preview || self.direction == Direction::ToVintageStory)
+            .collect()
     }
 
     fn step_available(&self, step: Step) -> bool {
@@ -201,7 +219,9 @@ impl OdasioApp {
         match step {
             Step::World => true,
             Step::Analysis => self.world.is_some(),
-            Step::Mapping | Step::Options | Step::Convert => self.inventory().is_some(),
+            Step::Mapping | Step::Preview | Step::Options | Step::Convert => {
+                self.inventory().is_some()
+            }
         }
     }
 
@@ -229,8 +249,9 @@ impl OdasioApp {
         ui.add_space(10.0);
 
         // Étapes : numérotées, cliquables quand elles sont accessibles.
+        let steps = self.steps();
         ui.horizontal_wrapped(|ui| {
-            for (i, step) in Step::ALL.into_iter().enumerate() {
+            for (i, &step) in steps.iter().enumerate() {
                 let current = step == self.step;
                 let done = step < self.step;
                 let available = self.step_available(step);
@@ -261,7 +282,7 @@ impl OdasioApp {
                 if ui.add_enabled(available, button).clicked() {
                     self.step = step;
                 }
-                if i + 1 < Step::ALL.len() {
+                if i + 1 < steps.len() {
                     ui.label(RichText::new("›").color(p.muted));
                 }
             }
@@ -269,13 +290,14 @@ impl OdasioApp {
     }
 
     fn footer(&mut self, ui: &mut Ui) {
-        let index = Step::ALL.iter().position(|s| *s == self.step).unwrap_or(0);
+        let steps = self.steps();
+        let index = steps.iter().position(|s| *s == self.step).unwrap_or(0);
         ui.horizontal(|ui| {
             if index > 0 && theme::secondary_button(ui, tr("app.back")).clicked() {
-                self.step = Step::ALL[index - 1];
+                self.step = steps[index - 1];
             }
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                if let Some(&next) = Step::ALL.get(index + 1) {
+                if let Some(&next) = steps.get(index + 1) {
                     let enabled = self.step_available(next);
                     if theme::primary_button(ui, &format!("{}  ›", next.label()), enabled).clicked()
                     {
@@ -321,7 +343,13 @@ impl eframe::App for OdasioApp {
                         ui.add_space(20.0);
                         // Contenu centré, largeur bornée : lisible sur grand écran,
                         // pleine largeur sur petite fenêtre.
-                        let width = ui.available_width().min(theme::CONTENT_MAX);
+                        // L'aperçu, côte à côte, profite de toute la largeur.
+                        let max = if self.step == Step::Preview {
+                            f32::INFINITY
+                        } else {
+                            theme::CONTENT_MAX
+                        };
+                        let width = ui.available_width().min(max);
                         let margin = ((ui.available_width() - width) / 2.0).max(0.0);
                         ui.horizontal(|ui| {
                             ui.add_space(margin);
@@ -335,6 +363,7 @@ impl eframe::App for OdasioApp {
                                         Step::World => views::reverse::show_world(self, ui),
                                         Step::Analysis => views::reverse::show_analysis(self, ui),
                                         Step::Mapping => views::reverse::show_mapping(self, ui),
+                                        Step::Preview => {}
                                         Step::Options => views::reverse::show_options(self, ui),
                                         Step::Convert => views::reverse::show_convert(self, ui),
                                     }
@@ -344,6 +373,7 @@ impl eframe::App for OdasioApp {
                                     Step::World => views::world::show(self, ui),
                                     Step::Analysis => views::analysis::show(self, ui),
                                     Step::Mapping => views::mapping::show(self, ui),
+                                    Step::Preview => views::preview::show(self, ui),
                                     Step::Options => views::options::show(self, ui),
                                     Step::Convert => views::convert::show(self, ui),
                                 }

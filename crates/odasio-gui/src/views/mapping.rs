@@ -290,7 +290,7 @@ fn group_card(
 }
 
 /// Fenêtre de choix d'un bloc VS. Renvoie vrai si un choix a été appliqué.
-fn picker(app: &mut OdasioApp, ctx: &egui::Context) -> bool {
+pub fn picker(app: &mut OdasioApp, ctx: &egui::Context) -> bool {
     let Some(mut state) = app.mapping_view.picker.clone() else {
         return false;
     };

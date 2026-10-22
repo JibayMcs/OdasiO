@@ -31,6 +31,35 @@ impl Scene {
         self.cells[(y * self.size_z + z) * self.size_x + x]
     }
 
+    /// Coordonnées (x, y, z) d'un index de cellule.
+    pub fn position(&self, cell: usize) -> (usize, usize, usize) {
+        let x = cell % self.size_x;
+        let z = (cell / self.size_x) % self.size_z;
+        (x, cell / (self.size_x * self.size_z), z)
+    }
+
+    /// Position dans la vue tournée de `quarter` quarts de tour d'une colonne (`x`, `z`) de
+    /// cette scène (comme [`Scene::rotated`]).
+    pub fn rotate_xz(&self, quarter: u8, x: usize, z: usize) -> (usize, usize) {
+        match quarter % 4 {
+            0 => (x, z),
+            1 => (self.size_z - 1 - z, x),
+            2 => (self.size_x - 1 - x, self.size_z - 1 - z),
+            _ => (z, self.size_x - 1 - x),
+        }
+    }
+
+    /// Position dans la scène d'origine d'une colonne (`x`, `z`) de la vue tournée de
+    /// `quarter` quarts de tour (inverse de [`Scene::rotated`]).
+    pub fn unrotate(&self, quarter: u8, x: usize, z: usize) -> (usize, usize) {
+        match quarter % 4 {
+            0 => (x, z),
+            1 => (z, self.size_z - 1 - x),
+            2 => (self.size_x - 1 - x, self.size_z - 1 - z),
+            _ => (self.size_x - 1 - z, x),
+        }
+    }
+
     #[inline]
     pub fn set(&mut self, x: usize, y: usize, z: usize, look: u32) {
         self.cells[(y * self.size_z + z) * self.size_x + x] = look;
@@ -70,6 +99,8 @@ pub struct Image {
     pub width: usize,
     pub height: usize,
     pub rgba: Vec<u8>,
+    /// Pour chaque pixel, la cellule de la scène dessinée au premier plan (index + 1, 0 = rien).
+    pub pick: Vec<u32>,
 }
 
 impl Image {
@@ -78,7 +109,18 @@ impl Image {
             width,
             height,
             rgba: vec![0; width * height * 4],
+            pick: vec![0; width * height],
         }
+    }
+
+    /// Cellule de la scène visible au pixel (`x`, `y`).
+    pub fn picked(&self, x: usize, y: usize) -> Option<usize> {
+        if x >= self.width || y >= self.height {
+            return None;
+        }
+        self.pick[y * self.width + x]
+            .checked_sub(1)
+            .map(|c| c as usize)
     }
 
     #[inline]
@@ -119,6 +161,8 @@ struct Skin<'a> {
     uv: [f32; 4],
     shade: f32,
     alpha: f32,
+    /// Cellule de la scène (index + 1) inscrite dans le tampon de sélection.
+    cell: u32,
 }
 
 /// Dessine un parallélogramme texturé : `o` + u·`du` + v·`dv`, avec (u, v) dans [0, 1]²
@@ -129,6 +173,7 @@ fn draw_quad(image: &mut Image, o: [f32; 2], du: [f32; 2], dv: [f32; 2], skin: &
         uv,
         shade,
         alpha,
+        cell,
     } = *skin;
     let det = du[0] * dv[1] - du[1] * dv[0];
     if det.abs() < 1e-6 {
@@ -162,6 +207,9 @@ fn draw_quad(image: &mut Image, o: [f32; 2], du: [f32; 2], dv: [f32; 2], skin: &
                 (texel[3] as f32 * alpha) as u8,
             ];
             image.blend(px, py, color);
+            if texel[3] >= 128 {
+                image.pick[py as usize * image.width + px as usize] = cell;
+            }
         }
     }
 }
@@ -170,6 +218,26 @@ fn draw_quad(image: &mut Image, o: [f32; 2], du: [f32; 2], dv: [f32; 2], skin: &
 const SHADE_TOP: f32 = 1.0;
 const SHADE_SOUTH: f32 = 0.8;
 const SHADE_EAST: f32 = 0.64;
+
+/// Contour à l'écran (hexagone, en pixels de l'image rendue) du bloc (`x`, `y`, `z`) de la
+/// scène, pour surligner une sélection.
+pub fn block_outline(scene: &Scene, a: f32, x: usize, y: usize, z: usize) -> [[f32; 2]; 6] {
+    let projection = Projection {
+        a,
+        origin_x: scene.size_z as f32 * a + 1.0,
+        origin_y: scene.size_y as f32 * a + 1.0,
+    };
+    let (x0, y0, z0) = (x as f32, y as f32, z as f32);
+    let (x1, y1, z1) = (x0 + 1.0, y0 + 1.0, z0 + 1.0);
+    [
+        projection.point(x0, y1, z0),
+        projection.point(x1, y1, z0),
+        projection.point(x1, y0, z0),
+        projection.point(x1, y0, z1),
+        projection.point(x0, y0, z1),
+        projection.point(x0, y1, z1),
+    ]
+}
 
 /// Rend la scène. `looks[i]` est l'aspect de l'index `i` (l'index 0, l'air, est ignoré).
 /// `a` : demi-largeur d'un bloc à l'écran, en pixels.
@@ -220,6 +288,7 @@ pub fn render(scene: &Scene, looks: &[Option<BlockLook>], a: f32) -> Image {
                     continue;
                 }
                 let (fx, fy, fz) = (x as f32, y as f32, z as f32);
+                let cell = ((y * scene.size_z + z) * scene.size_x + x) as u32 + 1;
                 match &block.shape {
                     Shape::Cuboid { min, max } => {
                         let (x0, x1) = (fx + min[0], fx + max[0]);
@@ -241,6 +310,7 @@ pub fn render(scene: &Scene, looks: &[Option<BlockLook>], a: f32) -> Image {
                                     uv: [min[0], 1.0 - max[1], max[0], 1.0 - min[1]],
                                     shade: SHADE_SOUTH,
                                     alpha: 1.0,
+                                    cell,
                                 },
                             );
                         }
@@ -256,6 +326,7 @@ pub fn render(scene: &Scene, looks: &[Option<BlockLook>], a: f32) -> Image {
                                     uv: [1.0 - max[2], 1.0 - max[1], 1.0 - min[2], 1.0 - min[1]],
                                     shade: SHADE_EAST,
                                     alpha: 1.0,
+                                    cell,
                                 },
                             );
                         }
@@ -271,6 +342,7 @@ pub fn render(scene: &Scene, looks: &[Option<BlockLook>], a: f32) -> Image {
                                     uv: [min[0], min[2], max[0], max[2]],
                                     shade: SHADE_TOP,
                                     alpha: 1.0,
+                                    cell,
                                 },
                             );
                         }
@@ -289,6 +361,7 @@ pub fn render(scene: &Scene, looks: &[Option<BlockLook>], a: f32) -> Image {
                                 uv: [0.0, 0.0, 1.0, 1.0],
                                 shade: SHADE_TOP,
                                 alpha: 1.0,
+                                cell,
                             },
                         );
                     }
@@ -308,6 +381,7 @@ pub fn render(scene: &Scene, looks: &[Option<BlockLook>], a: f32) -> Image {
                                     uv: [0.0, 0.0, 1.0, 1.0],
                                     shade: SHADE_TOP,
                                     alpha: 0.8,
+                                    cell,
                                 },
                             );
                         }
@@ -361,8 +435,14 @@ mod tests {
     fn rotation_keeps_every_block() {
         let mut scene = Scene::new(3, 2, 5);
         scene.set(0, 1, 4, 7);
-        let rotated = scene.rotated(1);
-        assert_eq!((rotated.size_x, rotated.size_z), (5, 3));
-        assert_eq!(rotated.cells.iter().filter(|&&c| c == 7).count(), 1);
+        for quarter in 0..4 {
+            let rotated = scene.rotated(quarter);
+            let cell = rotated.cells.iter().position(|&c| c == 7).unwrap();
+            let (x, y, z) = rotated.position(cell);
+            assert_eq!(y, 1);
+            assert_eq!(scene.unrotate(quarter, x, z), (0, 4), "quart {quarter}");
+            assert_eq!(scene.rotate_xz(quarter, 0, 4), (x, z), "quart {quarter}");
+        }
+        assert_eq!(scene.rotated(1).size_x, 5);
     }
 }
