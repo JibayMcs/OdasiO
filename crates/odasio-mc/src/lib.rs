@@ -10,6 +10,7 @@ pub mod legacy;
 pub mod level;
 pub mod region;
 pub mod world;
+pub mod writer;
 
 pub use block::BlockState;
 pub use block_entity::{McBlockEntity, SignText};

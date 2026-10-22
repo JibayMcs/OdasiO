@@ -11,7 +11,7 @@ pub mod template;
 pub mod tree;
 
 pub use column::{Column, EncodedColumn, LightSource, WorldGenPass};
-pub use db::{VsDatabase, position_key};
+pub use db::{DecodedColumn, VsDatabase, position_key};
 pub use light::{LightTables, light_columns};
 pub use savegame::SaveGame;
 pub use template::{TemplateOptions, VsInstall};

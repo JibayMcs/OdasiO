@@ -76,6 +76,102 @@ fn write_string(out: &mut Vec<u8>, s: &str) {
     out.extend_from_slice(s.as_bytes());
 }
 
+/// Lecteur binaire du format .NET `BinaryReader`.
+struct Reader<'a> {
+    data: &'a [u8],
+    pos: usize,
+}
+
+impl<'a> Reader<'a> {
+    fn take(&mut self, n: usize) -> Option<&'a [u8]> {
+        let out = self.data.get(self.pos..self.pos + n)?;
+        self.pos += n;
+        Some(out)
+    }
+
+    fn u8(&mut self) -> Option<u8> {
+        Some(self.take(1)?[0])
+    }
+
+    fn i32(&mut self) -> Option<i32> {
+        Some(i32::from_le_bytes(self.take(4)?.try_into().ok()?))
+    }
+
+    fn string(&mut self) -> Option<String> {
+        let mut len = 0usize;
+        for shift in (0..35).step_by(7) {
+            let b = self.u8()?;
+            len |= ((b & 0x7f) as usize) << shift;
+            if b & 0x80 == 0 {
+                break;
+            }
+        }
+        Some(String::from_utf8_lossy(self.take(len)?).into_owned())
+    }
+
+    fn tree(&mut self) -> Option<Tree> {
+        let mut tree = Tree::new();
+        loop {
+            let kind = self.u8()?;
+            if kind == 0 {
+                return Some(tree);
+            }
+            let key = self.string()?;
+            let value = match kind {
+                1 => Attr::Int(self.i32()?),
+                2 => Attr::Long(i64::from_le_bytes(self.take(8)?.try_into().ok()?)),
+                3 => Attr::Double(f64::from_le_bytes(self.take(8)?.try_into().ok()?)),
+                4 => Attr::Float(f32::from_le_bytes(self.take(4)?.try_into().ok()?)),
+                5 => Attr::Str(self.string()?),
+                6 => Attr::Tree(self.tree()?),
+                9 => Attr::Bool(self.u8()? != 0),
+                // Types non utilisés par la conversion : sautés sans être conservés.
+                7 => {
+                    if self.u8()? == 0 {
+                        self.take(12)?;
+                        self.tree()?;
+                    }
+                    continue;
+                }
+                8 => {
+                    let len = u16::from_le_bytes(self.take(2)?.try_into().ok()?) as usize;
+                    self.take(len)?;
+                    continue;
+                }
+                10 => {
+                    for _ in 0..self.i32()? {
+                        self.string()?;
+                    }
+                    continue;
+                }
+                11 | 12 => {
+                    let n = self.i32()? as usize;
+                    self.take(n * 4)?;
+                    continue;
+                }
+                13 | 15 => {
+                    let n = self.i32()? as usize;
+                    self.take(n * 8)?;
+                    continue;
+                }
+                14 => {
+                    for _ in 0..self.i32()? {
+                        self.tree()?;
+                    }
+                    continue;
+                }
+                16 => {
+                    let n = self.i32()? as usize;
+                    self.take(n)?;
+                    continue;
+                }
+                _ => return None,
+            };
+            tree.0.push((key, value));
+        }
+    }
+}
+
 /// Block entity à écrire dans le champ 8 du chunk qui contient sa position.
 #[derive(Debug, Clone, PartialEq)]
 pub struct BlockEntity {
@@ -100,6 +196,35 @@ impl BlockEntity {
                 .to_string(),
             attrs: Tree::new(),
         }
+    }
+
+    /// Lit un élément du champ 8 d'un chunk : nom de classe puis arbre d'attributs.
+    pub fn from_bytes(data: &[u8]) -> Option<Self> {
+        let mut reader = Reader { data, pos: 0 };
+        let class = reader.string()?;
+        let mut attrs = reader.tree()?;
+        let int = |t: &Tree, k: &str| match t.get(k) {
+            Some(Attr::Int(v)) => Some(*v),
+            _ => None,
+        };
+        let pos = [
+            int(&attrs, "posx")?,
+            int(&attrs, "posy")?,
+            int(&attrs, "posz")?,
+        ];
+        let block_code = match attrs.get("blockCode") {
+            Some(Attr::Str(code)) => code.clone(),
+            _ => String::new(),
+        };
+        attrs
+            .0
+            .retain(|(k, _)| !matches!(k.as_str(), "posx" | "posy" | "posz" | "blockCode"));
+        Some(Self {
+            class,
+            pos,
+            block_code,
+            attrs,
+        })
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -145,6 +270,17 @@ mod tests {
         .map(|h| u8::from_str_radix(h, 16).unwrap())
         .collect();
         assert_eq!(sign.to_bytes(), expected);
+    }
+
+    #[test]
+    fn block_entities_roundtrip() {
+        let mut door = BlockEntity::new("Generic", [512000, 140, -3], "game:door-solid-oak");
+        door.attrs
+            .set("rotateYRad", Attr::Float(std::f32::consts::PI))
+            .set("opened", Attr::Bool(true))
+            .set("inventory", Attr::Tree(Tree::new()));
+        let read = BlockEntity::from_bytes(&door.to_bytes()).unwrap();
+        assert_eq!(read, door);
     }
 
     #[test]

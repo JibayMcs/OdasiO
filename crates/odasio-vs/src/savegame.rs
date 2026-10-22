@@ -19,6 +19,8 @@ pub struct SaveGame {
     pub map_size: [u32; 3],
     pub world_name: String,
     pub world_type: String,
+    /// Point d'apparition par défaut (`DefaultSpawn`), `None` = centre de la carte.
+    pub default_spawn: Option<[i32; 3]>,
 }
 
 impl SaveGame {
@@ -26,6 +28,7 @@ impl SaveGame {
         let mut map_size = [0u32; 3];
         let mut world_name = String::new();
         let mut world_type = String::new();
+        let mut default_spawn = None;
         for field in ProtoReader::new(&raw) {
             let field = field?;
             match field.number {
@@ -35,6 +38,17 @@ impl SaveGame {
                 }
                 F_WORLD_NAME => world_name = text(field.value.as_bytes()),
                 F_WORLD_TYPE => world_type = text(field.value.as_bytes()),
+                F_DEFAULT_SPAWN => {
+                    let mut pos = [0i32; 3];
+                    for f in ProtoReader::new(field.value.as_bytes().unwrap_or_default()) {
+                        let f = f?;
+                        if (1..=3).contains(&f.number) {
+                            pos[f.number as usize - 1] =
+                                f.value.as_u64().unwrap_or(0) as i64 as i32;
+                        }
+                    }
+                    default_spawn = Some(pos);
+                }
                 _ => {}
             }
         }
@@ -43,6 +57,7 @@ impl SaveGame {
             map_size,
             world_name,
             world_type,
+            default_spawn,
         })
     }
 
@@ -181,6 +196,7 @@ mod tests {
         save.set_default_spawn(512001, 121, 512001).unwrap();
         save.set_world_name("Odasio").unwrap();
         let reparsed = SaveGame::parse(save.to_bytes().to_vec()).unwrap();
+        assert_eq!(reparsed.default_spawn, Some([512001, 121, 512001]));
         assert_eq!(reparsed.world_name, "Odasio");
         assert_eq!(reparsed.block_ids().unwrap().len(), 3);
         let spawns = ProtoReader::new(save.to_bytes())

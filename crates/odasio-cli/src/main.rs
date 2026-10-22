@@ -73,6 +73,25 @@ enum Command {
         /// Fichier .vcdbs
         save: PathBuf,
     },
+    /// Convertit une sauvegarde Vintage Story en monde Minecraft Java
+    ToMinecraft {
+        /// Fichier .vcdbs
+        save: PathBuf,
+        /// Dossier du monde Minecraft à créer
+        out: PathBuf,
+        /// Nom du monde Minecraft
+        #[arg(long, default_value = "OdasiO")]
+        name: String,
+        /// Remplace le dossier s'il existe
+        #[arg(long)]
+        force: bool,
+        /// Terrain hors de la zone convertie
+        #[arg(long, value_enum, default_value_t = McTerrainArg::Ocean)]
+        terrain: McTerrainArg,
+        /// Mode de jeu
+        #[arg(long, value_enum, default_value_t = GameModeArg::Creative)]
+        game_mode: GameModeArg,
+    },
     /// Convertit une dimension Minecraft en monde Vintage Story
     Convert {
         /// Dossier du monde Minecraft (contient level.dat)
@@ -139,6 +158,16 @@ enum SeasonArg {
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
+enum McTerrainArg {
+    /// Terrain Minecraft normal
+    Normal,
+    /// Eau à perte de vue
+    Ocean,
+    /// Vide
+    Void,
+}
+
+#[derive(Clone, Copy, clap::ValueEnum)]
 enum GameModeArg {
     Creative,
     Survival,
@@ -170,6 +199,28 @@ fn main() -> Result<()> {
         Command::Plan { world, rock, top } => plan(&world, rock.as_deref(), top)?,
         Command::Inspect { save, x, z } => inspect(&save, x / 32, z / 32)?,
         Command::Audit { save } => audit(&save)?,
+        Command::ToMinecraft {
+            save,
+            out,
+            name,
+            force,
+            terrain,
+            game_mode,
+        } => {
+            use odasio_core::mc::writer::Generator;
+            let opts = odasio_core::to_minecraft::ToMcOptions {
+                output: out,
+                overwrite: force,
+                world_name: name,
+                generator: match terrain {
+                    McTerrainArg::Normal => Generator::Normal,
+                    McTerrainArg::Ocean => Generator::Ocean,
+                    McTerrainArg::Void => Generator::Void,
+                },
+                creative: matches!(game_mode, GameModeArg::Creative),
+            };
+            to_minecraft(&save, &opts)?;
+        }
         Command::Convert {
             world,
             name,
@@ -589,6 +640,43 @@ fn audit(save: &Path) -> Result<()> {
                 "pas de lumière"
             }
         );
+    }
+    Ok(())
+}
+
+fn to_minecraft(save: &Path, opts: &odasio_core::to_minecraft::ToMcOptions) -> Result<()> {
+    use odasio_core::to_minecraft::{ToMcProgress, convert_to_minecraft};
+
+    let mapping = odasio_core::reverse::ReverseMapping::builtin();
+    println!(
+        "Conversion de {} vers {}",
+        save.display(),
+        opts.output.display()
+    );
+    let report = convert_to_minecraft(save, &mapping, opts, |p| match p {
+        ToMcProgress::Converting { done, total } => {
+            if done == total || done % 10 == 0 {
+                println!("  régions : {done}/{total}");
+            }
+        }
+        ToMcProgress::Finishing => println!("Finalisation..."),
+    })?;
+    println!(
+        "\nTerminé en {:.1?} : {} colonnes VS, {} chunks Minecraft, {} block entities ({} panneaux avec texte)",
+        report.elapsed, report.columns, report.chunks, report.block_entities, report.signs
+    );
+    println!(
+        "Spawn : {} {} {}",
+        report.spawn[0], report.spawn[1], report.spawn[2]
+    );
+    let total: u64 = report.unmapped.values().sum();
+    if total > 0 {
+        let mut sorted: Vec<_> = report.unmapped.iter().collect();
+        sorted.sort_by_key(|(_, n)| std::cmp::Reverse(**n));
+        println!("{} blocs sans correspondance (repli), dont :", total);
+        for (code, n) in sorted.iter().take(10) {
+            println!("  {n:>10}  {code}");
+        }
     }
     Ok(())
 }

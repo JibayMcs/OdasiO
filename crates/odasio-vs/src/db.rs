@@ -5,7 +5,10 @@ use std::path::Path;
 use rusqlite::{Connection, OptionalExtension, params};
 
 use crate::column::EncodedColumn;
+use crate::layer;
+use crate::proto::ProtoReader;
 use crate::savegame::SaveGame;
+use crate::tree::BlockEntity;
 use crate::{Result, VsError};
 
 /// Clé de position des tables `chunk`, `mapchunk` et `mapregion` (dimension 0).
@@ -13,6 +16,20 @@ use crate::{Result, VsError};
 pub fn position_key(x: u32, y: u32, z: u32) -> i64 {
     debug_assert!(x < 1 << 22 && z < 1 << 22 && y < 1024);
     (x as u64 | (z as u64) << 27 | (y as u64) << 54) as i64
+}
+
+/// Colonne relue depuis une sauvegarde.
+pub struct DecodedColumn {
+    pub cx: u32,
+    pub cz: u32,
+    /// 32 768 IDs de blocs par chunk, `None` si le chunk est vide.
+    pub blocks: Vec<Option<Vec<u32>>>,
+    pub fluids: Vec<Option<Vec<u32>>>,
+    pub block_entities: Vec<BlockEntity>,
+}
+
+fn non_empty(cells: Vec<u32>) -> Option<Vec<u32>> {
+    cells.iter().any(|&v| v != 0).then_some(cells)
 }
 
 pub struct VsDatabase {
@@ -78,6 +95,37 @@ impl VsDatabase {
             ));
         }
         Ok(out)
+    }
+
+    /// Lit une colonne : blocs et fluides par `cy` (`None` = vide) et block entities.
+    /// `None` si la colonne n'existe pas dans la sauvegarde.
+    pub fn read_column(&self, cx: u32, cz: u32) -> Result<Option<DecodedColumn>> {
+        let height = (self.save.map_size[1] / 32) as usize;
+        let mut column = DecodedColumn {
+            cx,
+            cz,
+            blocks: vec![None; height],
+            fluids: vec![None; height],
+            block_entities: Vec::new(),
+        };
+        let mut found = false;
+        for cy in 0..height {
+            let Some(blob) = self.read_chunk(cx, cy as u32, cz)? else {
+                continue;
+            };
+            found = true;
+            for field in ProtoReader::new(&blob) {
+                let field = field?;
+                let bytes = field.value.as_bytes().unwrap_or_default();
+                match field.number {
+                    1 => column.blocks[cy] = non_empty(layer::decode(bytes)?),
+                    16 => column.fluids[cy] = non_empty(layer::decode(bytes)?),
+                    8 => column.block_entities.extend(BlockEntity::from_bytes(bytes)),
+                    _ => {}
+                }
+            }
+        }
+        Ok(found.then_some(column))
     }
 
     pub fn chunk_count(&self) -> Result<i64> {

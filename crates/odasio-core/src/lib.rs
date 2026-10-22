@@ -8,6 +8,8 @@ pub mod mapping;
 pub mod ocean;
 pub mod paths;
 pub mod plan;
+pub mod reverse;
+pub mod to_minecraft;
 
 pub use convert::{
     ConvertOptions, ConvertReport, GameMode, Lighting, Progress, Season, WorldType, convert,
