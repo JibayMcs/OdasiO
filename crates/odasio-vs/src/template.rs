@@ -3,6 +3,7 @@
 //! Le monde modèle fournit un `gamedata` cohérent (table des IDs de blocs, configuration)
 //! dans lequel on injecte ensuite les colonnes converties.
 
+use std::collections::BTreeMap;
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
@@ -25,6 +26,8 @@ pub struct TemplateOptions {
     /// d'éclairer nos colonnes.
     pub world_type: String,
     pub play_style: String,
+    /// Réglages du monde (`WorldConfiguration`), par code : `landcover`, `seasons`...
+    pub world_config: BTreeMap<String, String>,
 }
 
 impl Default for TemplateOptions {
@@ -35,6 +38,7 @@ impl Default for TemplateOptions {
             seed: "12345".into(),
             world_type: "superflat".into(),
             play_style: "creativebuilding".into(),
+            world_config: BTreeMap::new(),
         }
     }
 }
@@ -85,6 +89,9 @@ fn server_config(data_dir: &Path, save: &Path, opts: &TemplateOptions) -> Result
     world["WorldType"] = opts.world_type.clone().into();
     world["PlayStyle"] = opts.play_style.clone().into();
     world["PlayStyleLangCode"] = opts.play_style.clone().into();
+    if !opts.world_config.is_empty() {
+        world["WorldConfiguration"] = serde_json::to_value(&opts.world_config)?;
+    }
     Ok(serde_json::to_string_pretty(&config)?)
 }
 

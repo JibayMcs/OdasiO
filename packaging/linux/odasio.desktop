@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=OdasiO
+Comment=Convertisseur de mondes Minecraft vers Vintage Story
+Comment[en]=Minecraft to Vintage Story world converter
+Exec=odasio-gui
+Icon=odasio
+Terminal=false
+Categories=Utility;Game;
+StartupWMClass=odasio

@@ -1,7 +1,7 @@
 //! Étape 4 : réglages du monde Vintage Story produit.
 
 use eframe::egui::{self, RichText, Ui};
-use odasio_core::{WorldType, paths};
+use odasio_core::{GameMode, Season, WorldType, paths};
 
 use crate::app::OdasioApp;
 use crate::theme::{self, Palette};
@@ -110,13 +110,41 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
                         );
                         ui.radio_value(
                             &mut app.form.world_type,
+                            WorldType::Ocean,
+                            "Océan : de l'eau à perte de vue, votre monde comme une île",
+                        );
+                        ui.radio_value(
+                            &mut app.form.world_type,
                             WorldType::Superflat,
                             "Superflat : une plaine plate",
                         );
                     },
                 );
 
-                let standard = app.form.world_type == WorldType::Standard;
+                row(
+                    ui,
+                    "Saison",
+                    "Modifiable ensuite en jeu avec /worldconfig seasons.",
+                    |ui| {
+                        egui::ComboBox::from_id_salt("season")
+                            .selected_text(app.form.season.label())
+                            .width(220.0)
+                            .show_ui(ui, |ui| {
+                                for season in Season::ALL {
+                                    ui.selectable_value(&mut app.form.season, season, season.label());
+                                }
+                            });
+                    },
+                );
+
+                row(ui, "Mode de jeu", "", |ui| {
+                    ui.horizontal(|ui| {
+                        ui.radio_value(&mut app.form.game_mode, GameMode::Creative, "Créatif");
+                        ui.radio_value(&mut app.form.game_mode, GameMode::Survival, "Survie");
+                    });
+                });
+
+                let standard = app.form.world_type.aligns_sea();
                 if standard {
                     let (height, offset) = odasio_core::standard_layout(
                         app.inventory().and_then(|i| i.y_range),

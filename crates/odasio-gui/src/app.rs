@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use eframe::egui::{self, Align, Layout, RichText, Stroke, Ui};
 use odasio_core::mc::World;
-use odasio_core::{ConversionPlan, ConvertReport, Inventory, Mapping, WorldType};
+use odasio_core::{ConversionPlan, ConvertReport, GameMode, Inventory, Mapping, Season, WorldType};
 
 use crate::recent::Recent;
 use crate::task::Task;
@@ -55,8 +55,10 @@ pub struct ConvertForm {
     pub map_size_y: u32,
     pub y_offset: i32,
     pub world_type: WorldType,
-    /// Monde standard : hauteur et décalage calculés pour aligner les mers.
+    /// Monde standard ou océan : hauteur et décalage calculés pour aligner les mers.
     pub auto_layout: bool,
+    pub season: Season,
+    pub game_mode: GameMode,
 }
 
 pub struct OdasioApp {
@@ -98,6 +100,8 @@ impl OdasioApp {
                 y_offset: 64,
                 world_type: WorldType::Standard,
                 auto_layout: true,
+                season: Season::Cycle,
+                game_mode: GameMode::Creative,
             },
             convert: None,
         }
@@ -105,7 +109,7 @@ impl OdasioApp {
 
     /// Hauteur et décalage effectifs de la conversion.
     pub fn layout(&self) -> (u32, i32) {
-        if self.form.world_type == WorldType::Standard && self.form.auto_layout {
+        if self.form.world_type.aligns_sea() && self.form.auto_layout {
             odasio_core::standard_layout(self.inventory().and_then(|i| i.y_range))
         } else {
             (self.form.map_size_y, self.form.y_offset)
@@ -185,7 +189,14 @@ impl OdasioApp {
     fn header(&mut self, ui: &mut Ui) {
         let p = Palette::of(ui);
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Odasio").size(22.0).strong().color(p.accent));
+            ui.add(
+                egui::Image::from_bytes(
+                    "bytes://odasio-icon.png",
+                    include_bytes!("../../../packaging/icons/hicolor/64x64/apps/odasio.png"),
+                )
+                .fit_to_exact_size(egui::vec2(30.0, 30.0)),
+            );
+            ui.label(RichText::new("OdasiO").size(22.0).strong().color(p.accent));
             ui.label(RichText::new("Minecraft vers Vintage Story").color(p.muted));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 egui::widgets::global_theme_preference_switch(ui);

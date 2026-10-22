@@ -51,6 +51,64 @@ pub enum WorldType {
     Superflat,
     /// Terrain, climat et végétation de Vintage Story autour de la zone convertie.
     Standard,
+    /// Océan à perte de vue autour de la zone convertie (monde standard sans terres).
+    Ocean,
+}
+
+/// Saison du monde VS (`seasons`), modifiable ensuite en jeu avec `/worldconfig seasons`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Season {
+    Cycle,
+    Spring,
+    Summer,
+    Fall,
+    Winter,
+}
+
+impl Season {
+    pub const ALL: [Season; 5] = [
+        Season::Cycle,
+        Season::Spring,
+        Season::Summer,
+        Season::Fall,
+        Season::Winter,
+    ];
+
+    pub fn code(self) -> &'static str {
+        match self {
+            Season::Cycle => "enabled",
+            Season::Spring => "spring",
+            Season::Summer => "summer",
+            Season::Fall => "fall",
+            Season::Winter => "winter",
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Season::Cycle => "Saisons actives",
+            Season::Spring => "Toujours le printemps",
+            Season::Summer => "Toujours l'été",
+            Season::Fall => "Toujours l'automne",
+            Season::Winter => "Toujours l'hiver",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GameMode {
+    Survival,
+    Creative,
+}
+
+impl GameMode {
+    /// Style de jeu VS correspondant.
+    fn play_style(self) -> &'static str {
+        match self {
+            GameMode::Survival => "surviveandbuild",
+            GameMode::Creative => "creativebuilding",
+        }
+    }
 }
 
 /// Niveau de la mer d'un monde VS standard (`TerraGenConfig.seaLevel`).
@@ -75,10 +133,15 @@ pub fn standard_layout(y_range: Option<(i32, i32)>) -> (u32, i32) {
 }
 
 impl WorldType {
+    /// Terrain VS autour de la zone : les mers doivent être alignées.
+    pub fn aligns_sea(self) -> bool {
+        self != WorldType::Superflat
+    }
+
     pub fn code(self) -> &'static str {
         match self {
             WorldType::Superflat => "superflat",
-            WorldType::Standard => "standard",
+            WorldType::Standard | WorldType::Ocean => "standard",
         }
     }
 }
@@ -107,6 +170,8 @@ pub struct ConvertOptions {
     pub y_offset: i32,
     pub world_type: WorldType,
     pub lighting: Lighting,
+    pub season: Season,
+    pub game_mode: GameMode,
 }
 
 impl ConvertOptions {
@@ -121,6 +186,8 @@ impl ConvertOptions {
             y_offset: 64,
             world_type: WorldType::Superflat,
             lighting: Lighting::Odasio,
+            season: Season::Cycle,
+            game_mode: GameMode::Creative,
         }
     }
 }
@@ -431,6 +498,22 @@ fn convert_region(
     Ok(result)
 }
 
+/// Réglages du monde (`WorldConfiguration`) transmis au serveur à la création du modèle.
+fn world_config(opts: &ConvertOptions) -> BTreeMap<String, String> {
+    let mut config = BTreeMap::new();
+    if opts.world_type != WorldType::Superflat {
+        // Le style créatif impose un climat uniforme ; on garde le climat réaliste.
+        config.insert("worldClimate".into(), "realistic".into());
+    }
+    if opts.world_type == WorldType::Ocean {
+        config.insert("landcover".into(), "0".into());
+    }
+    if opts.season != Season::Cycle {
+        config.insert("seasons".into(), opts.season.code().into());
+    }
+    config
+}
+
 fn prepare_output(opts: &ConvertOptions, progress: &(impl Fn(Progress) + Sync)) -> Result<()> {
     if opts.output.exists() {
         if !opts.overwrite {
@@ -451,6 +534,8 @@ fn prepare_output(opts: &ConvertOptions, progress: &(impl Fn(Progress) + Sync)) 
                 world_name: opts.world_name.clone(),
                 map_size_y: opts.map_size_y,
                 world_type: opts.world_type.code().into(),
+                play_style: opts.game_mode.play_style().into(),
+                world_config: world_config(opts),
                 ..Default::default()
             };
             let generated =
@@ -616,6 +701,18 @@ fn choose_spawn(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn world_config_follows_the_options() {
+        let mut opts = ConvertOptions::new(PathBuf::from("x.vcdbs"));
+        assert!(world_config(&opts).is_empty());
+        opts.world_type = WorldType::Ocean;
+        opts.season = Season::Summer;
+        let config = world_config(&opts);
+        assert_eq!(config["landcover"], "0");
+        assert_eq!(config["seasons"], "summer");
+        assert_eq!(config["worldClimate"], "realistic");
+    }
 
     #[test]
     fn sea_levels_match_the_game() {

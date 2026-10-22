@@ -5,7 +5,8 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use odasio_core::mc::World;
 use odasio_core::{
-    ConversionPlan, ConvertOptions, Inventory, Lighting, Mapping, Progress, Quality, WorldType,
+    ConversionPlan, ConvertOptions, GameMode, Inventory, Lighting, Mapping, Progress, Quality,
+    Season, WorldType,
 };
 use tracing_subscriber::EnvFilter;
 
@@ -108,6 +109,12 @@ enum Command {
         /// Qui calcule l'éclairage
         #[arg(long, value_enum, default_value_t = LightingArg::Odasio)]
         lighting: LightingArg,
+        /// Saison (modifiable ensuite en jeu : /worldconfig seasons)
+        #[arg(long, value_enum, default_value_t = SeasonArg::Cycle)]
+        season: SeasonArg,
+        /// Mode de jeu
+        #[arg(long, value_enum, default_value_t = GameModeArg::Creative)]
+        game_mode: GameModeArg,
     },
 }
 
@@ -117,6 +124,24 @@ enum WorldTypeArg {
     Superflat,
     /// Terrain, climat et végétation de Vintage Story
     Standard,
+    /// Océan à perte de vue
+    Ocean,
+}
+
+#[derive(Clone, Copy, clap::ValueEnum)]
+enum SeasonArg {
+    /// Saisons actives
+    Cycle,
+    Spring,
+    Summer,
+    Fall,
+    Winter,
+}
+
+#[derive(Clone, Copy, clap::ValueEnum)]
+enum GameModeArg {
+    Creative,
+    Survival,
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -157,6 +182,8 @@ fn main() -> Result<()> {
             y_offset,
             world_type,
             lighting,
+            season,
+            game_mode,
         } => {
             let output = match out {
                 Some(out) => out,
@@ -172,8 +199,20 @@ fn main() -> Result<()> {
             opts.world_type = match world_type {
                 WorldTypeArg::Superflat => WorldType::Superflat,
                 WorldTypeArg::Standard => WorldType::Standard,
+                WorldTypeArg::Ocean => WorldType::Ocean,
             };
-            if opts.world_type == WorldType::Standard && (height.is_none() || y_offset.is_none()) {
+            opts.season = match season {
+                SeasonArg::Cycle => Season::Cycle,
+                SeasonArg::Spring => Season::Spring,
+                SeasonArg::Summer => Season::Summer,
+                SeasonArg::Fall => Season::Fall,
+                SeasonArg::Winter => Season::Winter,
+            };
+            opts.game_mode = match game_mode {
+                GameModeArg::Creative => GameMode::Creative,
+                GameModeArg::Survival => GameMode::Survival,
+            };
+            if opts.world_type.aligns_sea() && (height.is_none() || y_offset.is_none()) {
                 let args = WorldArgs {
                     world: world.clone(),
                     dimension: opts.dimension.clone(),
@@ -184,7 +223,7 @@ fn main() -> Result<()> {
                 opts.map_size_y = height.unwrap_or(auto_height);
                 opts.y_offset = y_offset.unwrap_or(auto_offset);
                 println!(
-                    "Monde standard : hauteur {}, décalage {:+} (mer Minecraft Y = 63 -> Y = {})\n",
+                    "Mers alignées : hauteur {}, décalage {:+} (mer Minecraft Y = 63 -> Y = {})\n",
                     opts.map_size_y,
                     opts.y_offset,
                     63 + opts.y_offset
