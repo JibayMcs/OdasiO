@@ -12,12 +12,13 @@ use std::time::{Duration, Instant};
 
 use odasio_mc::{BlockState, Chunk, Region, World};
 use odasio_vs::{
-    CHUNK_SIZE, Column, DEFAULT_MAP_SIZE_XZ, EncodedColumn, TemplateOptions, VsDatabase, VsInstall,
-    WorldGenPass, template,
+    CHUNK_SIZE, Column, DEFAULT_MAP_SIZE_XZ, EncodedColumn, LightSource, TemplateOptions,
+    VsDatabase, VsInstall, WorldGenPass, template,
 };
 use rayon::prelude::*;
 use thiserror::Error;
 
+use crate::catalog;
 use crate::mapping::Mapping;
 
 #[derive(Debug, Error)]
@@ -118,12 +119,20 @@ fn origin(world: &World, region_files: &[PathBuf]) -> [i64; 2] {
     center.map(|c| MAP_CENTER - c.div_euclid(512) * 512)
 }
 
-/// Correspondances résolues pour un monde donné : (bloc, fluide) en IDs numériques.
+/// Bloc et fluide VS d'un état Minecraft, en IDs numériques du monde.
+#[derive(Debug, Clone, Copy, Default)]
+struct VsIds {
+    block: u32,
+    fluid: u32,
+    block_emits_light: bool,
+    fluid_emits_light: bool,
+}
+
 struct IdResolver<'a> {
     mapping: &'a Mapping,
     ids: &'a HashMap<String, u32>,
     missing: &'a Mutex<BTreeMap<String, u64>>,
-    cache: HashMap<BlockState, (u32, u32)>,
+    cache: HashMap<BlockState, VsIds>,
 }
 
 impl IdResolver<'_> {
@@ -142,17 +151,27 @@ impl IdResolver<'_> {
         }
     }
 
-    fn resolve(&mut self, state: &BlockState) -> (u32, u32) {
+    fn resolve(&mut self, state: &BlockState) -> VsIds {
         if let Some(&ids) = self.cache.get(state) {
             return ids;
         }
         let resolved = self.mapping.resolve(state);
-        let block = self.id(&resolved.block, 1);
-        let fluid = resolved.fluid.as_deref().map_or(0, |f| self.id(f, 1));
-        self.cache.insert(state.clone(), (block, fluid));
-        (block, fluid)
+        let ids = VsIds {
+            block: self.id(&resolved.block, 1),
+            fluid: resolved.fluid.as_deref().map_or(0, |f| self.id(f, 1)),
+            block_emits_light: catalog::vs_light(&resolved.block).is_some(),
+            fluid_emits_light: resolved
+                .fluid
+                .as_deref()
+                .is_some_and(|f| catalog::vs_light(f).is_some()),
+        };
+        self.cache.insert(state.clone(), ids);
+        ids
     }
 }
+
+/// Fluide lumineux posé dans une colonne : x, y, z locaux et ID du fluide.
+type FluidLight = (usize, usize, usize, u32);
 
 struct RegionResult {
     columns: Vec<EncodedColumn>,
@@ -174,6 +193,9 @@ fn convert_region(
     let height_chunks = (opts.map_size_y as usize) / CHUNK_SIZE;
     let height = opts.map_size_y as i32;
     let mut columns: HashMap<(u32, u32), Column> = HashMap::new();
+    // Fluides lumineux (lave) : seule leur surface est déclarée au jeu, la lumière se
+    // propage ensuite d'elle-même.
+    let mut fluid_lights: HashMap<(u32, u32), Vec<FluidLight>> = HashMap::new();
     let mut result = RegionResult {
         columns: Vec::new(),
         mc_chunks: 0,
@@ -217,7 +239,7 @@ fn convert_region(
             if section.is_empty() {
                 continue;
             }
-            let ids: Vec<(u32, u32)> = section
+            let ids: Vec<VsIds> = section
                 .palette
                 .iter()
                 .map(|s| resolver.resolve(s))
@@ -225,7 +247,12 @@ fn convert_region(
             let base_y = section.y as i32 * 16 + opts.y_offset;
             for i in 0..4096usize {
                 let p = section.indices.as_ref().map_or(0, |idx| idx[i] as usize);
-                let (block, fluid) = ids[p];
+                let VsIds {
+                    block,
+                    fluid,
+                    block_emits_light,
+                    fluid_emits_light,
+                } = ids[p];
                 if block == 0 && fluid == 0 {
                     continue;
                 }
@@ -237,11 +264,40 @@ fn convert_region(
                 let (x, z) = (ox + (i & 15), oz + ((i >> 4) & 15));
                 column.set_block(x, y as usize, z, block);
                 column.set_fluid(x, y as usize, z, fluid);
+                if block_emits_light {
+                    column.light_sources.push(LightSource {
+                        pos: [
+                            key.0 as i32 * 32 + x as i32,
+                            y,
+                            key.1 as i32 * 32 + z as i32,
+                        ],
+                        block_id: block,
+                    });
+                }
+                if fluid_emits_light {
+                    fluid_lights
+                        .entry(key)
+                        .or_default()
+                        .push((x, y as usize, z, fluid));
+                }
             }
         }
     }
 
-    for (key, column) in columns {
+    for (key, mut column) in columns {
+        for (x, y, z, id) in fluid_lights.remove(&key).unwrap_or_default() {
+            let covered = y + 1 < column.height() && column.fluid(x, y + 1, z) == id;
+            if !covered {
+                column.light_sources.push(LightSource {
+                    pos: [
+                        key.0 as i32 * 32 + x as i32,
+                        y as i32,
+                        key.1 as i32 * 32 + z as i32,
+                    ],
+                    block_id: id,
+                });
+            }
+        }
         let surface = (0..column.height())
             .rev()
             .find(|&y| column.block(16, y, 16) != 0 || column.fluid(16, y, 16) != 0)

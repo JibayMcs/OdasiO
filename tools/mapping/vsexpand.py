@@ -164,6 +164,7 @@ def main(root, out):
 
     codes = set()
     entity = {}
+    light = {}
     errors = 0
     nfiles = 0
     for origin in ('game', 'survival', 'creative'):
@@ -206,6 +207,8 @@ def main(root, out):
                             variants.append(base + '-' + s)
                     allow = [wildcard(p) for p in ci(bt_, 'allowedVariants') or []]
                     skip = [wildcard(p) for p in ci(bt_, 'skipVariants') or []]
+                    lh = ci(bt_, 'lightHsv')
+                    lhbt = [(wildcard(k), v) for k, v in (ci(bt_, 'lightHsvByType') or {}).items()]
                     ec = ci(bt_, 'entityClass')
                     ecbt = [(wildcard(k), v) for k, v in (ci(bt_, 'entityClassByType') or {}).items()]
                     for v in variants:
@@ -221,14 +224,28 @@ def main(root, out):
                                 break
                         if e:
                             entity['game:' + v.lower()] = e
+                        hsv = lh
+                        for r, val in lhbt:
+                            if r.match(v):
+                                hsv = val
+                                break
+                        if hsv and len(hsv) == 3 and hsv[2] > 0:
+                            light['game:' + v.lower()] = hsv
     codes.add('game:air')     # hard-coded block id 0 in VS (no blocktype json)
     codes.add('game:mantle')  # hard-coded in VSEssentials (bedrock equivalent, no json)
     if len(sys.argv) > 3:
         json.dump(entity, open(sys.argv[3], 'w'), indent=0, sort_keys=True)
+    if len(sys.argv) > 4:
+        with open(sys.argv[4], 'w') as f:
+            f.write('# code VS\tteinte\tsaturation\tintensité (lightHsv)\n')
+            for code in sorted(light):
+                f.write('%s\t%d\t%d\t%d\n' % (code, *light[code]))
+        print('light sources', len(light), file=sys.stderr)
     with open(out, 'w') as f:
         f.write('\n'.join(sorted(codes)) + '\n')
     print('blocktypes', nfiles, 'codes', len(codes), 'parse errors', errors, file=sys.stderr)
 
 
 if __name__ == '__main__':
+    # Usage : vsexpand.py <dossier VS> <codes.txt> [entités.json] [lumières.tsv]
     main(sys.argv[1], sys.argv[2])

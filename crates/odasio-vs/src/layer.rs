@@ -134,6 +134,33 @@ pub fn decode(blob: &[u8]) -> Result<Vec<u32>> {
     Ok(out)
 }
 
+/// Décode la couche de lumière (champs 2 et 3 d'un chunk : plans de bits et palette,
+/// compressés séparément). Renvoie `None` si la colonne n'a pas encore été éclairée.
+pub fn decode_light(planes: &[u8], palette: &[u8]) -> Result<Option<Vec<u32>>> {
+    if planes.is_empty() || palette.is_empty() {
+        return Ok(None);
+    }
+    let palette: Vec<u32> = zstd_decompress(palette)?
+        .chunks_exact(4)
+        .map(|b| u32::from_le_bytes(b.try_into().unwrap()))
+        .collect();
+    let planes = zstd_decompress(planes)?;
+    let nbits = planes.len() / (PLANE_WORDS * 4);
+    let word = |k: usize, w: usize| {
+        let at = (k * PLANE_WORDS + w) * 4;
+        u32::from_le_bytes(planes[at..at + 4].try_into().unwrap())
+    };
+    let mut out = vec![0u32; CHUNK_CELLS];
+    for (i, cell) in out.iter_mut().enumerate() {
+        let mut p = 0usize;
+        for k in 0..nbits {
+            p |= (((word(k, i >> 5) >> (i & 31)) & 1) as usize) << k;
+        }
+        *cell = palette.get(p).copied().unwrap_or(0);
+    }
+    Ok(Some(out))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

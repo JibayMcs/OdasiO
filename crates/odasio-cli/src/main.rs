@@ -348,15 +348,19 @@ fn inspect(save: &Path, cx: u32, cz: u32) -> Result<()> {
         .with_context(|| format!("pas de map chunk en {cx},{cz}"))?;
     let mut pass = None;
     let mut y_max = None;
+    let mut light_sources = 0;
     for field in ProtoReader::new(&map) {
         let field = field?;
         match field.number {
             4 => pass = field.value.as_u64(),
             10 => y_max = field.value.as_u64(),
+            17 => light_sources += 1,
             _ => {}
         }
     }
-    println!("Colonne {cx},{cz} : passe {pass:?} (6 = terminée), YMax {y_max:?}");
+    println!(
+        "Colonne {cx},{cz} : passe {pass:?} (6 = terminée), YMax {y_max:?}, {light_sources} sources lumineuses en attente"
+    );
 
     for cy in 0..db.save.map_size[1] / 32 {
         let Some(blob) = db.read_chunk(cx, cy, cz)? else {
@@ -364,15 +368,25 @@ fn inspect(save: &Path, cx: u32, cz: u32) -> Result<()> {
             continue;
         };
         let mut blocks = Vec::new();
-        let mut light = 0usize;
+        let (mut planes, mut palette): (&[u8], &[u8]) = (&[], &[]);
         for field in ProtoReader::new(&blob) {
             let field = field?;
             match field.number {
                 1 => blocks = layer::decode(field.value.as_bytes().unwrap_or_default())?,
-                2 => light = field.value.as_bytes().map_or(0, <[u8]>::len),
+                2 => planes = field.value.as_bytes().unwrap_or_default(),
+                3 => palette = field.value.as_bytes().unwrap_or_default(),
                 _ => {}
             }
         }
+        // Lumière : bits 0-4 soleil, 5-9 intensité de la lumière de bloc.
+        let light = match layer::decode_light(planes, palette)? {
+            None => "non calculée".to_string(),
+            Some(cells) => {
+                let sun = cells.iter().map(|v| v & 31).max().unwrap_or(0);
+                let block = cells.iter().map(|v| (v >> 5) & 31).max().unwrap_or(0);
+                format!("soleil {sun:>2}, bloc {block:>2}")
+            }
+        };
         let mut counts: std::collections::HashMap<u32, usize> = std::collections::HashMap::new();
         for id in blocks.iter().filter(|&&id| id != 0) {
             *counts.entry(*id).or_default() += 1;
@@ -385,8 +399,7 @@ fn inspect(save: &Path, cx: u32, cz: u32) -> Result<()> {
             .map(|(id, n)| format!("{} x{n}", names.get(id).unwrap_or(&"?")))
             .collect();
         println!(
-            "  cy {cy:>2} : lumière {:>5} octets, {}",
-            light,
+            "  cy {cy:>2} : lumière {light:<17} {}",
             if summary.is_empty() {
                 "air".to_string()
             } else {
