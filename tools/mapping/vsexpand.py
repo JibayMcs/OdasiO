@@ -234,7 +234,13 @@ def main(root, out):
     codes.add('game:air')     # hard-coded block id 0 in VS (no blocktype json)
     codes.add('game:mantle')  # hard-coded in VSEssentials (bedrock equivalent, no json)
     if len(sys.argv) > 3:
-        json.dump(entity, open(sys.argv[3], 'w'), indent=0, sort_keys=True)
+        if sys.argv[3].endswith('.tsv'):
+            with open(sys.argv[3], 'w') as f:
+                f.write('# code VS\tclasse de block entity (entityClass)\n')
+                for code in sorted(entity):
+                    f.write('%s\t%s\n' % (code, entity[code]))
+        else:
+            json.dump(entity, open(sys.argv[3], 'w'), indent=0, sort_keys=True)
     if len(sys.argv) > 4:
         with open(sys.argv[4], 'w') as f:
             f.write('# code VS\tteinte\tsaturation\tintensité (lightHsv)\n')
@@ -247,5 +253,5 @@ def main(root, out):
 
 
 if __name__ == '__main__':
-    # Usage : vsexpand.py <dossier VS> <codes.txt> [entités.json] [lumières.tsv]
+    # Usage : vsexpand.py <dossier VS> <codes.txt> [entités.tsv|.json] [lumières.tsv]
     main(sys.argv[1], sys.argv[2])

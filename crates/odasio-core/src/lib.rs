@@ -1,5 +1,6 @@
 //! Cœur d'Odasio : table de correspondance des blocs et pipeline de conversion.
 
+pub mod block_entity;
 pub mod catalog;
 pub mod convert;
 pub mod inventory;

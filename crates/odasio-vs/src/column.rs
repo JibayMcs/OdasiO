@@ -1,6 +1,7 @@
 //! Colonne de chunks 32x32 sur toute la hauteur du monde, prête à être écrite.
 
 use crate::proto::ProtoWriter;
+use crate::tree::BlockEntity;
 use crate::{CHUNK_CELLS, CHUNK_SIZE, Result, TARGET_GAME_VERSION, layer};
 
 /// Passe de génération VS (`EnumWorldGenPass`).
@@ -39,6 +40,10 @@ pub struct Column {
     blocks: Vec<Option<Cells>>,
     fluids: Vec<Option<Cells>>,
     pub light_sources: Vec<LightSource>,
+    pub block_entities: Vec<BlockEntity>,
+    /// Block entities à « poser » au premier chargement (`NewBlockEntities` du map chunk) :
+    /// le jeu appelle leur `OnBlockPlaced`, par exemple pour lancer la croissance d'une pousse.
+    pub placed_on_load: Vec<[i32; 3]>,
 }
 
 /// Blobs prêts pour la base : chunks par `cy` et map chunk.
@@ -58,6 +63,8 @@ impl Column {
             blocks: (0..height_chunks).map(|_| None).collect(),
             fluids: (0..height_chunks).map(|_| None).collect(),
             light_sources: Vec::new(),
+            block_entities: Vec::new(),
+            placed_on_load: Vec::new(),
         }
     }
 
@@ -114,7 +121,7 @@ impl Column {
         let empty = vec![0u32; CHUNK_CELLS];
         let mut chunks = Vec::with_capacity(self.blocks.len());
         let mut non_air = false;
-        for (blocks, fluids) in self.blocks.iter().zip(&self.fluids) {
+        for (cy, (blocks, fluids)) in self.blocks.iter().zip(&self.fluids).enumerate() {
             let blocks = blocks.as_deref().unwrap_or(&empty);
             let fluids = fluids.as_deref().unwrap_or(&empty);
             let is_empty = blocks.iter().all(|&v| v == 0) && fluids.iter().all(|&v| v == 0);
@@ -130,6 +137,18 @@ impl Column {
                 .bytes(16, &layer::encode(fluids)?);
             if is_empty {
                 w.bool(13, true);
+            }
+            // Une block entity vit dans le chunk qui contient sa position.
+            let entities: Vec<&BlockEntity> = self
+                .block_entities
+                .iter()
+                .filter(|be| be.pos[1].div_euclid(CHUNK_SIZE as i32) == cy as i32)
+                .collect();
+            if !entities.is_empty() {
+                w.uint(7, entities.len() as u64);
+                for be in entities {
+                    w.bytes(8, &be.to_bytes());
+                }
             }
             chunks.push(w.into_bytes());
         }
@@ -149,6 +168,11 @@ impl Column {
             w.uint(13, top_rock_id as u64);
         }
         w.uint(16, 3);
+        for pos in &self.placed_on_load {
+            w.message(9, |m| {
+                m.int32(1, pos[0]).int32(2, pos[1]).int32(3, pos[2]);
+            });
+        }
         for source in &self.light_sources {
             w.message(17, |m| {
                 m.int32(1, source.pos[0])

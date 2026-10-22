@@ -7,11 +7,13 @@ pub mod layer;
 pub mod proto;
 pub mod savegame;
 pub mod template;
+pub mod tree;
 
 pub use column::{Column, EncodedColumn, LightSource, WorldGenPass};
 pub use db::{VsDatabase, position_key};
 pub use savegame::SaveGame;
 pub use template::{TemplateOptions, VsInstall};
+pub use tree::{Attr, BlockEntity, Tree};
 
 use thiserror::Error;
 

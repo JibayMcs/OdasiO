@@ -309,6 +309,14 @@ fn convert(path: &Path, rock: Option<&str>, opts: &ConvertOptions) -> Result<()>
         report.clipped_blocks
     );
     println!(
+        "Block entities : {} (dont {} panneaux avec texte)",
+        report.block_entities.values().sum::<usize>(),
+        report.signs
+    );
+    for (class, n) in &report.block_entities {
+        println!("  {class:<24} {n}");
+    }
+    println!(
         "Spawn : {} {} {}",
         report.spawn[0], report.spawn[1], report.spawn[2]
     );

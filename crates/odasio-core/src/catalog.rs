@@ -5,6 +5,7 @@ use std::sync::OnceLock;
 
 static CODES_TXT: &str = include_str!("../../../assets/vs_block_codes.txt");
 static LIGHT_TSV: &str = include_str!("../../../assets/vs_block_light.tsv");
+static ENTITIES_TSV: &str = include_str!("../../../assets/vs_block_entities.tsv");
 
 /// Ensemble trié des codes VS 1.22.7 (`game:rock-granite`...).
 pub fn vs_codes() -> &'static BTreeSet<String> {
@@ -40,6 +41,22 @@ pub fn vs_light(code: &str) -> Option<[u8; 3]> {
                     }
                     Some((code, hsv))
                 })
+                .collect()
+        })
+        .get(code)
+        .copied()
+}
+
+/// Classe de block entity d'un bloc VS (`entityClass` de son blocktype).
+pub fn vs_entity_class(code: &str) -> Option<&'static str> {
+    static CLASSES: OnceLock<std::collections::HashMap<&'static str, &'static str>> =
+        OnceLock::new();
+    CLASSES
+        .get_or_init(|| {
+            ENTITIES_TSV
+                .lines()
+                .filter(|l| !l.starts_with('#'))
+                .filter_map(|l| l.split_once('\t'))
                 .collect()
         })
         .get(code)

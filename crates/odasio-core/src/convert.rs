@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use odasio_mc::{BlockState, Chunk, Region, World};
+use odasio_mc::{BlockState, Chunk, Region, SignText, World};
 use odasio_vs::{
     CHUNK_SIZE, Column, DEFAULT_MAP_SIZE_XZ, EncodedColumn, LightSource, TemplateOptions,
     VsDatabase, VsInstall, WorldGenPass, template,
@@ -18,6 +18,7 @@ use odasio_vs::{
 use rayon::prelude::*;
 use thiserror::Error;
 
+use crate::block_entity::{self, BeTemplate};
 use crate::catalog;
 use crate::mapping::Mapping;
 
@@ -86,6 +87,10 @@ pub struct ConvertReport {
     pub missing_codes: BTreeMap<String, u64>,
     /// Blocs coupés car hors de la hauteur du monde VS.
     pub clipped_blocks: u64,
+    /// Block entities écrites, par classe VS (coffres, portes, panneaux...).
+    pub block_entities: BTreeMap<String, usize>,
+    /// Panneaux dont le texte a été repris.
+    pub signs: usize,
     pub spawn: [i32; 3],
     pub elapsed: Duration,
 }
@@ -126,6 +131,8 @@ struct VsIds {
     fluid: u32,
     block_emits_light: bool,
     fluid_emits_light: bool,
+    /// Index dans [`IdResolver::templates`] si le bloc a besoin d'une block entity.
+    block_entity: Option<u32>,
 }
 
 struct IdResolver<'a> {
@@ -133,6 +140,7 @@ struct IdResolver<'a> {
     ids: &'a HashMap<String, u32>,
     missing: &'a Mutex<BTreeMap<String, u64>>,
     cache: HashMap<BlockState, VsIds>,
+    templates: Vec<BeTemplate>,
 }
 
 impl IdResolver<'_> {
@@ -156,14 +164,24 @@ impl IdResolver<'_> {
             return ids;
         }
         let resolved = self.mapping.resolve(state);
+        let block = self.id(&resolved.block, 1);
+        // Pas de block entity pour un bloc absent du jeu (remplacé par de l'air).
+        let block_entity = (block != 0)
+            .then(|| block_entity::template(state, &resolved.block))
+            .flatten()
+            .map(|t| {
+                self.templates.push(t);
+                (self.templates.len() - 1) as u32
+            });
         let ids = VsIds {
-            block: self.id(&resolved.block, 1),
+            block,
             fluid: resolved.fluid.as_deref().map_or(0, |f| self.id(f, 1)),
             block_emits_light: catalog::vs_light(&resolved.block).is_some(),
             fluid_emits_light: resolved
                 .fluid
                 .as_deref()
                 .is_some_and(|f| catalog::vs_light(f).is_some()),
+            block_entity,
         };
         self.cache.insert(state.clone(), ids);
         ids
@@ -178,6 +196,8 @@ struct RegionResult {
     mc_chunks: usize,
     skipped: usize,
     clipped: u64,
+    block_entities: BTreeMap<String, usize>,
+    signs: usize,
     /// Hauteur du sol par colonne VS au centre de la colonne (pour choisir le spawn).
     surface: Vec<((u32, u32), u16)>,
 }
@@ -201,6 +221,8 @@ fn convert_region(
         mc_chunks: 0,
         skipped: 0,
         clipped: 0,
+        block_entities: BTreeMap::new(),
+        signs: 0,
         surface: Vec::new(),
     };
 
@@ -234,6 +256,12 @@ fn convert_region(
         let column = columns
             .entry(key)
             .or_insert_with(|| Column::new(key.0, key.1, height_chunks));
+        // Texte des panneaux Minecraft, par position absolue.
+        let signs: HashMap<[i32; 3], &SignText> = chunk
+            .block_entities
+            .iter()
+            .filter_map(|be| be.sign.as_ref().map(|s| (be.pos, s)))
+            .collect();
 
         for section in &chunk.sections {
             if section.is_empty() {
@@ -252,6 +280,7 @@ fn convert_region(
                     fluid,
                     block_emits_light,
                     fluid_emits_light,
+                    block_entity,
                 } = ids[p];
                 if block == 0 && fluid == 0 {
                     continue;
@@ -273,6 +302,32 @@ fn convert_region(
                         ],
                         block_id: block,
                     });
+                }
+                if let Some(index) = block_entity {
+                    let template = &resolver.templates[index as usize];
+                    let mc_y = section.y as i32 * 16 + (i >> 8) as i32;
+                    let mc_pos = [
+                        chunk.x * 16 + (i & 15) as i32,
+                        mc_y,
+                        chunk.z * 16 + ((i >> 4) & 15) as i32,
+                    ];
+                    let pos = [
+                        key.0 as i32 * 32 + x as i32,
+                        y,
+                        key.1 as i32 * 32 + z as i32,
+                    ];
+                    let sign = signs.get(&mc_pos).copied();
+                    if template.takes_sign_text && sign.is_some_and(|s| !s.joined().is_empty()) {
+                        result.signs += 1;
+                    }
+                    column.block_entities.push(template.instantiate(pos, sign));
+                    if template.placed_on_load {
+                        column.placed_on_load.push(pos);
+                    }
+                    *result
+                        .block_entities
+                        .entry(template.class.clone())
+                        .or_default() += 1;
                 }
                 if fluid_emits_light {
                     fluid_lights
@@ -387,6 +442,7 @@ pub fn convert(
                     ids: &ids,
                     missing: &missing,
                     cache: HashMap::new(),
+                    templates: Vec::new(),
                 },
                 |resolver, file| {
                     let _ = tx.send(convert_region(file, resolver, opts, origin, top_rock));
@@ -402,6 +458,10 @@ pub fn convert(
             report.skipped_chunks += result.skipped;
             report.columns += result.columns.len();
             report.clipped_blocks += result.clipped;
+            for (class, n) in result.block_entities {
+                *report.block_entities.entry(class).or_default() += n;
+            }
+            report.signs += result.signs;
             surfaces.extend(result.surface);
             let done = done.fetch_add(1, Ordering::Relaxed) + 1;
             progress(Progress::Converting { done, total });

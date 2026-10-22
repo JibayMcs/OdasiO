@@ -7,6 +7,7 @@
 use serde::Deserialize;
 
 use crate::block::BlockState;
+use crate::block_entity::{self, McBlockEntity};
 use crate::legacy;
 use crate::{McError, Result};
 
@@ -67,6 +68,7 @@ pub struct Chunk {
     pub complete: bool,
     /// Sections triées par `y` croissant.
     pub sections: Vec<Section>,
+    pub block_entities: Vec<McBlockEntity>,
 }
 
 impl Chunk {
@@ -109,6 +111,8 @@ mod modern {
         status: String,
         #[serde(default)]
         sections: Vec<RawSection>,
+        #[serde(default)]
+        block_entities: Vec<fastnbt::Value>,
     }
 
     #[derive(Deserialize)]
@@ -153,6 +157,11 @@ mod modern {
             format: ChunkFormat::Modern,
             complete: matches!(raw.status.as_str(), "minecraft:full" | "full"),
             sections,
+            block_entities: raw
+                .block_entities
+                .iter()
+                .filter_map(block_entity::parse)
+                .collect(),
         })
     }
 }
@@ -180,6 +189,8 @@ mod flattened {
         status: String,
         #[serde(rename = "Sections", default)]
         sections: Vec<RawSection>,
+        #[serde(rename = "TileEntities", default)]
+        tile_entities: Vec<fastnbt::Value>,
     }
 
     #[derive(Deserialize)]
@@ -224,6 +235,11 @@ mod flattened {
                 "full" | "minecraft:full" | "postprocessed" | "fullchunk"
             ),
             sections,
+            block_entities: level
+                .tile_entities
+                .iter()
+                .filter_map(block_entity::parse)
+                .collect(),
         })
     }
 }
@@ -249,6 +265,8 @@ mod legacy_format {
         terrain_populated: i8,
         #[serde(rename = "Sections", default)]
         sections: Vec<RawSection>,
+        #[serde(rename = "TileEntities", default)]
+        tile_entities: Vec<fastnbt::Value>,
     }
 
     #[derive(Deserialize)]
@@ -307,6 +325,11 @@ mod legacy_format {
             format: ChunkFormat::Legacy,
             complete: level.terrain_populated != 0,
             sections,
+            block_entities: level
+                .tile_entities
+                .iter()
+                .filter_map(block_entity::parse)
+                .collect(),
         })
     }
 }

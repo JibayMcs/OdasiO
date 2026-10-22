@@ -60,10 +60,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:acacia_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:acacia_door"
 when = { half = "lower" }
@@ -428,37 +428,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:acacia_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:acacia_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:acacia_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:acacia_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:acacia_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:acacia_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:acacia_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:acacia_wood"
 when = { axis = "y" }
@@ -802,10 +802,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:bamboo_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:bamboo_door"
 when = { half = "lower" }
@@ -1217,37 +1217,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:bamboo_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:bamboo_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:bamboo_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:bamboo_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:bamboo_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:bamboo_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:barrel
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:barrel"
 when = { facing = "north" }
@@ -1391,10 +1391,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:birch_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:birch_door"
 when = { half = "lower" }
@@ -1759,37 +1759,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:birch_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:birch_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:birch_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:birch_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:birch_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:birch_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:birch_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:birch_wood"
 when = { axis = "y" }
@@ -1815,74 +1815,74 @@ note = "no 6-sided bark block in VS"
 # ---- minecraft:black_banner
 [[block]]
 mc = "minecraft:black_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:black_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:black_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:black_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:black_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:black_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:black_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:black_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:black_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:black_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:black_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:black_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:black_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:black_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:black_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:black_candle"
 vs = "game:candle"
@@ -1973,11 +1973,12 @@ note = "fired clay tile block"
 # ---- minecraft:black_wall_banner
 [[block]]
 mc = "minecraft:black_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:black_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:black_wool"
 vs = "game:planks-ebony-ud"
@@ -2237,74 +2238,74 @@ note = "VS clay oven (block entity), orientation unverified"
 # ---- minecraft:blue_banner
 [[block]]
 mc = "minecraft:blue_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:blue_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:blue_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:blue_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:blue_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:blue_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:blue_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:blue_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:blue_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:blue_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:blue_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:blue_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:blue_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:blue_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:blue_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:blue_candle"
 vs = "game:candle"
@@ -2409,11 +2410,12 @@ note = "fired clay tile block"
 # ---- minecraft:blue_wall_banner
 [[block]]
 mc = "minecraft:blue_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:blue_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:blue_wool"
 vs = "game:daub-blue-normal"
@@ -2678,74 +2680,74 @@ note = "VS fired clay bricks"
 # ---- minecraft:brown_banner
 [[block]]
 mc = "minecraft:brown_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:brown_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:brown_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:brown_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:brown_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:brown_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:brown_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:brown_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:brown_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:brown_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:brown_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:brown_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:brown_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:brown_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:brown_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:brown_candle"
 vs = "game:candle"
@@ -2851,11 +2853,12 @@ category = "terrain"
 note = "strate brune des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:brown_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:brown_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:brown_wool"
 vs = "game:daub-brown-normal"
@@ -3105,10 +3108,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:cherry_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:cherry_door"
 when = { half = "lower" }
@@ -3473,37 +3476,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:cherry_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:cherry_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:cherry_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:cherry_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:cherry_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:cherry_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:cherry_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:cherry_wood"
 when = { axis = "y" }
@@ -4153,10 +4156,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -4280,10 +4283,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:crimson_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:crimson_door"
 when = { half = "lower" }
@@ -4663,37 +4666,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:crimson_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:crimson_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:crimson_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:crimson_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:crimson_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:crimson_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:crying_obsidian
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:crying_obsidian"
 vs = "game:rock-obsidian"
@@ -4845,74 +4848,74 @@ category = "building"
 # ---- minecraft:cyan_banner
 [[block]]
 mc = "minecraft:cyan_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:cyan_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:cyan_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:cyan_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:cyan_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:cyan_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:cyan_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:cyan_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:cyan_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:cyan_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:cyan_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:cyan_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:cyan_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:cyan_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:cyan_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:cyan_candle"
 vs = "game:candle"
@@ -5003,11 +5006,12 @@ note = "fired clay tile block"
 # ---- minecraft:cyan_wall_banner
 [[block]]
 mc = "minecraft:cyan_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:cyan_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:cyan_wool"
 vs = "game:daub-blue-normal"
@@ -5043,10 +5047,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:dark_oak_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:dark_oak_door"
 when = { half = "lower" }
@@ -5411,37 +5415,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:dark_oak_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:dark_oak_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:dark_oak_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:dark_oak_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:dark_oak_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:dark_oak_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:dark_oak_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:dark_oak_wood"
 when = { axis = "y" }
@@ -6742,10 +6746,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:exposed_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:exposed_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -7370,74 +7374,74 @@ note = "rock-typed gravel follows [settings].rock"
 # ---- minecraft:gray_banner
 [[block]]
 mc = "minecraft:gray_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:gray_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:gray_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:gray_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:gray_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:gray_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:gray_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:gray_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:gray_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:gray_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:gray_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:gray_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:gray_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:gray_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:gray_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:gray_candle"
 vs = "game:candle"
@@ -7528,11 +7532,12 @@ note = "fired clay tile block"
 # ---- minecraft:gray_wall_banner
 [[block]]
 mc = "minecraft:gray_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:gray_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:gray_wool"
 vs = "game:daub-ash-normal"
@@ -7543,74 +7548,74 @@ category = "colored"
 note = "la laine VS est un revêtement d'un voxel : bloc plein de couleur proche à la place"
 [[block]]
 mc = "minecraft:green_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:green_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:green_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:green_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:green_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:green_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:green_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:green_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:green_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:green_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:green_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:green_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:green_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:green_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:green_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:green_candle"
 vs = "game:candle"
@@ -7701,11 +7706,12 @@ note = "fired clay tile block"
 # ---- minecraft:green_wall_banner
 [[block]]
 mc = "minecraft:green_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:green_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:green_wool"
 vs = "game:daub-green-normal"
@@ -7997,11 +8003,100 @@ category = "building"
 # ---- minecraft:iron_door
 [[block]]
 mc = "minecraft:iron_door"
-when = { half = "upper" }
-vs = "game:air"
+when = { half = "upper", facing = "north", open = "false", hinge = "left" }
+vs = "game:irondoor-north-up-closed-left"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "north", open = "false", hinge = "right" }
+vs = "game:irondoor-north-up-closed-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "north", open = "true", hinge = "left" }
+vs = "game:irondoor-north-up-opened-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "north", open = "true", hinge = "right" }
+vs = "game:irondoor-north-up-opened-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "east", open = "false", hinge = "left" }
+vs = "game:irondoor-east-up-closed-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "east", open = "false", hinge = "right" }
+vs = "game:irondoor-east-up-closed-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "east", open = "true", hinge = "left" }
+vs = "game:irondoor-east-up-opened-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "east", open = "true", hinge = "right" }
+vs = "game:irondoor-east-up-opened-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "south", open = "false", hinge = "left" }
+vs = "game:irondoor-south-up-closed-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "south", open = "false", hinge = "right" }
+vs = "game:irondoor-south-up-closed-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "south", open = "true", hinge = "left" }
+vs = "game:irondoor-south-up-opened-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "south", open = "true", hinge = "right" }
+vs = "game:irondoor-south-up-opened-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "west", open = "false", hinge = "left" }
+vs = "game:irondoor-west-up-closed-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "west", open = "false", hinge = "right" }
+vs = "game:irondoor-west-up-closed-right"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "west", open = "true", hinge = "left" }
+vs = "game:irondoor-west-up-opened-left"
+quality = "exact"
+category = "door"
+[[block]]
+mc = "minecraft:iron_door"
+when = { half = "upper", facing = "west", open = "true", hinge = "right" }
+vs = "game:irondoor-west-up-opened-right"
+quality = "exact"
+category = "door"
 [[block]]
 mc = "minecraft:iron_door"
 when = { half = "lower", facing = "north", open = "false", hinge = "left" }
@@ -8174,10 +8269,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:jungle_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:jungle_door"
 when = { half = "lower" }
@@ -8542,37 +8637,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:jungle_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:jungle_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:jungle_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:jungle_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:jungle_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:jungle_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:jungle_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:jungle_wood"
 when = { axis = "y" }
@@ -8804,74 +8899,74 @@ note = "technical / no VS equivalent, removed"
 # ---- minecraft:light_blue_banner
 [[block]]
 mc = "minecraft:light_blue_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:light_blue_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:light_blue_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_blue_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_blue_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_blue_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_blue_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_blue_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_blue_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_blue_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_blue_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_blue_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_blue_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_blue_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:light_blue_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_blue_candle"
 vs = "game:candle"
@@ -8962,11 +9057,12 @@ note = "fired clay tile block"
 # ---- minecraft:light_blue_wall_banner
 [[block]]
 mc = "minecraft:light_blue_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:light_blue_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:light_blue_wool"
 vs = "game:daub-blue-normal"
@@ -8977,74 +9073,74 @@ note = "VS wool only white/black/brown; coloured daub keeps the colour"
 # ---- minecraft:light_gray_banner
 [[block]]
 mc = "minecraft:light_gray_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:light_gray_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:light_gray_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_gray_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_gray_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_gray_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_gray_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_gray_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_gray_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_gray_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:light_gray_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_gray_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_gray_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:light_gray_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:light_gray_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:light_gray_candle"
 vs = "game:candle"
@@ -9136,11 +9232,12 @@ category = "terrain"
 note = "strate grise des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:light_gray_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:light_gray_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:light_gray_wool"
 vs = "game:daub-ash-normal"
@@ -9196,74 +9293,74 @@ category = "plant"
 # ---- minecraft:lime_banner
 [[block]]
 mc = "minecraft:lime_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:lime_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:lime_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:lime_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:lime_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:lime_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:lime_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:lime_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:lime_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:lime_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:lime_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:lime_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:lime_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:lime_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:lime_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:lime_candle"
 vs = "game:candle"
@@ -9354,11 +9451,12 @@ note = "fired clay tile block"
 # ---- minecraft:lime_wall_banner
 [[block]]
 mc = "minecraft:lime_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:lime_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:lime_wool"
 vs = "game:daub-green-normal"
@@ -9385,74 +9483,74 @@ note = "no crafting station block in VS; decorative table"
 # ---- minecraft:magenta_banner
 [[block]]
 mc = "minecraft:magenta_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:magenta_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:magenta_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:magenta_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:magenta_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:magenta_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:magenta_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:magenta_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:magenta_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:magenta_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:magenta_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:magenta_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:magenta_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:magenta_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:magenta_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:magenta_candle"
 vs = "game:candle"
@@ -9543,11 +9641,12 @@ note = "fired clay tile block"
 # ---- minecraft:magenta_wall_banner
 [[block]]
 mc = "minecraft:magenta_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:magenta_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:magenta_wool"
 vs = "game:daub-pink-normal"
@@ -9574,10 +9673,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:mangrove_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:mangrove_door"
 when = { half = "lower" }
@@ -9949,37 +10048,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:mangrove_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:mangrove_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:mangrove_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:mangrove_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:mangrove_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:mangrove_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:mangrove_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:mangrove_wood"
 when = { axis = "y" }
@@ -10842,10 +10941,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:oak_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:oak_door"
 when = { half = "lower" }
@@ -11210,37 +11309,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:oak_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:oak_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:oak_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:oak_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:oak_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:oak_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:oak_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:oak_wood"
 when = { axis = "y" }
@@ -11296,74 +11395,74 @@ category = "plant"
 # ---- minecraft:orange_banner
 [[block]]
 mc = "minecraft:orange_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:orange_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:orange_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:orange_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:orange_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:orange_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:orange_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:orange_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:orange_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:orange_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:orange_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:orange_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:orange_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:orange_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:orange_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:orange_candle"
 vs = "game:candle"
@@ -11461,11 +11560,12 @@ category = "colored"
 # ---- minecraft:orange_wall_banner
 [[block]]
 mc = "minecraft:orange_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:orange_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:orange_wool"
 vs = "game:daub-orange-normal"
@@ -11506,10 +11606,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:oxidized_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:oxidized_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -11669,10 +11769,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:pale_oak_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:pale_oak_door"
 when = { half = "lower" }
@@ -12037,37 +12137,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:pale_oak_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:pale_oak_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:pale_oak_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:pale_oak_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:pale_oak_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:pale_oak_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:pale_oak_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:pale_oak_wood"
 when = { axis = "y" }
@@ -12150,74 +12250,74 @@ category = "building"
 # ---- minecraft:pink_banner
 [[block]]
 mc = "minecraft:pink_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:pink_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:pink_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:pink_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:pink_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:pink_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:pink_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:pink_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:pink_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:pink_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:pink_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:pink_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:pink_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:pink_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:pink_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:pink_candle"
 vs = "game:candle"
@@ -12322,11 +12422,12 @@ category = "colored"
 # ---- minecraft:pink_wall_banner
 [[block]]
 mc = "minecraft:pink_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:pink_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:pink_wool"
 vs = "game:daub-pink-normal"
@@ -14125,74 +14226,74 @@ be = "PumpkinVine"
 # ---- minecraft:purple_banner
 [[block]]
 mc = "minecraft:purple_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:purple_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:purple_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:purple_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:purple_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:purple_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:purple_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:purple_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:purple_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:purple_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:purple_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:purple_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:purple_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:purple_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:purple_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:purple_candle"
 vs = "game:candle"
@@ -14283,11 +14384,12 @@ note = "fired clay tile block"
 # ---- minecraft:purple_wall_banner
 [[block]]
 mc = "minecraft:purple_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:purple_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:purple_wool"
 vs = "game:daub-pink-normal"
@@ -14531,74 +14633,74 @@ category = "ore"
 # ---- minecraft:red_banner
 [[block]]
 mc = "minecraft:red_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:red_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:red_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:red_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:red_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:red_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:red_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:red_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:red_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:red_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:red_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:red_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:red_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:red_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:red_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:red_candle"
 vs = "game:candle"
@@ -15084,11 +15186,12 @@ category = "colored"
 # ---- minecraft:red_wall_banner
 [[block]]
 mc = "minecraft:red_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:red_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:red_wool"
 vs = "game:daub-orange-normal"
@@ -16288,10 +16391,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:spruce_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:spruce_door"
 when = { half = "lower" }
@@ -16656,37 +16759,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:spruce_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:spruce_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:spruce_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:spruce_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:spruce_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:spruce_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:spruce_wood
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:spruce_wood"
 when = { axis = "y" }
@@ -18207,10 +18310,10 @@ note = "no VS equivalent"
 [[block]]
 mc = "minecraft:warped_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:warped_door"
 when = { half = "lower" }
@@ -18590,37 +18693,37 @@ be = "Sign"
 [[block]]
 mc = "minecraft:warped_wall_sign"
 when = { facing = "north" }
-vs = "game:sign-wall-north"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:warped_wall_sign"
-when = { facing = "east" }
-vs = "game:sign-wall-east"
-quality = "lossy"
-category = "sign"
-be = "Sign"
-note = "text lives in block entity"
-[[block]]
-mc = "minecraft:warped_wall_sign"
-when = { facing = "south" }
 vs = "game:sign-wall-south"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:warped_wall_sign"
-when = { facing = "west" }
+when = { facing = "east" }
 vs = "game:sign-wall-west"
 quality = "lossy"
 category = "sign"
 be = "Sign"
-note = "text lives in block entity"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:warped_wall_sign"
+when = { facing = "south" }
+vs = "game:sign-wall-north"
+quality = "lossy"
+category = "sign"
+be = "Sign"
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
+[[block]]
+mc = "minecraft:warped_wall_sign"
+when = { facing = "west" }
+vs = "game:sign-wall-east"
+quality = "lossy"
+category = "sign"
+be = "Sign"
 
 # ---- minecraft:warped_wart_block
+note = "VS : sign-wall-<côté> = bord du bloc portant le panneau, opposé au facing MC"
 [[block]]
 mc = "minecraft:warped_wart_block"
 vs = "game:leaves-placed-ebony"
@@ -18727,10 +18830,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:waxed_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:waxed_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -18869,10 +18972,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:waxed_exposed_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:waxed_exposed_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -19011,10 +19114,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:waxed_oxidized_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:waxed_oxidized_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -19153,10 +19256,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:waxed_weathered_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:waxed_weathered_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -19295,10 +19398,10 @@ be = "Lantern"
 [[block]]
 mc = "minecraft:weathered_copper_door"
 when = { half = "upper" }
-vs = "game:air"
+vs = "game:multiblock-monolithic-0-p1-0"
 quality = "exact"
 category = "door"
-note = "moitié haute : déjà occupée par le bloc VS posé depuis la moitié basse"
+note = "moitié haute : pièce de multibloc de la porte VS (posée depuis la moitié basse)"
 [[block]]
 mc = "minecraft:weathered_copper_door"
 vs = "game:door-1x2heavy-aged"
@@ -19486,74 +19589,74 @@ category = "plant"
 # ---- minecraft:white_banner
 [[block]]
 mc = "minecraft:white_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:white_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:white_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:white_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:white_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:white_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:white_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:white_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:white_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:white_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:white_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:white_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:white_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:white_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:white_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:white_candle"
 vs = "game:candle"
@@ -19652,11 +19755,12 @@ category = "colored"
 # ---- minecraft:white_wall_banner
 [[block]]
 mc = "minecraft:white_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:white_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:white_wool"
 vs = "game:plaster-plain"
@@ -19695,74 +19799,74 @@ category = "building"
 # ---- minecraft:yellow_banner
 [[block]]
 mc = "minecraft:yellow_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
-note = "couleurs, motifs et orientation dans le block entity VS"
 
 # ---- minecraft:yellow_bed
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:yellow_bed"
 when = { part = "head", facing = "north" }
-vs = "game:bed-wood-head-north"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:yellow_bed"
-when = { part = "head", facing = "east" }
-vs = "game:bed-wood-head-east"
-quality = "lossy"
-category = "colored"
-be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:yellow_bed"
-when = { part = "head", facing = "south" }
 vs = "game:bed-wood-head-south"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:yellow_bed"
-when = { part = "head", facing = "west" }
+when = { part = "head", facing = "east" }
 vs = "game:bed-wood-head-west"
 quality = "lossy"
 category = "colored"
 be = "Bed"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:yellow_bed"
+when = { part = "head", facing = "south" }
+vs = "game:bed-wood-head-north"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:yellow_bed"
+when = { part = "head", facing = "west" }
+vs = "game:bed-wood-head-east"
+quality = "lossy"
+category = "colored"
+be = "Bed"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:yellow_bed"
 when = { part = "foot", facing = "north" }
-vs = "game:bed-wood-feet-north"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:yellow_bed"
-when = { part = "foot", facing = "east" }
-vs = "game:bed-wood-feet-east"
-quality = "lossy"
-category = "colored"
-note = "colour lost; VS bed facing convention unverified"
-[[block]]
-mc = "minecraft:yellow_bed"
-when = { part = "foot", facing = "south" }
 vs = "game:bed-wood-feet-south"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:yellow_bed"
-when = { part = "foot", facing = "west" }
+when = { part = "foot", facing = "east" }
 vs = "game:bed-wood-feet-west"
 quality = "lossy"
 category = "colored"
-note = "colour lost; VS bed facing convention unverified"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:yellow_bed"
+when = { part = "foot", facing = "south" }
+vs = "game:bed-wood-feet-north"
+quality = "lossy"
+category = "colored"
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
+[[block]]
+mc = "minecraft:yellow_bed"
+when = { part = "foot", facing = "west" }
+vs = "game:bed-wood-feet-east"
+quality = "lossy"
+category = "colored"
 
 # ---- minecraft:yellow_candle
+note = "VS : le côté du lit pointe de la tête vers les pieds, opposé au facing MC"
 [[block]]
 mc = "minecraft:yellow_candle"
 vs = "game:candle"
@@ -19854,11 +19958,12 @@ category = "terrain"
 note = "strate jaune des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:yellow_wall_banner"
-vs = "game:banner-banner"
-quality = "lossy"
+vs = "game:air"
+quality = "removed"
 category = "sign"
 
 # ---- minecraft:yellow_wool
+note = "pas de bannière à motifs dans VS 1.22 ; à remplacer par un bloc au choix"
 [[block]]
 mc = "minecraft:yellow_wool"
 vs = "game:daub-yellow-normal"

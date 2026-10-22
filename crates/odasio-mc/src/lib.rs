@@ -4,6 +4,7 @@
 //! formats 1.18+, 1.13 à 1.17 et antérieurs à 1.13 (identifiants numériques).
 
 pub mod block;
+pub mod block_entity;
 pub mod chunk;
 pub mod legacy;
 pub mod level;
@@ -11,6 +12,7 @@ pub mod region;
 pub mod world;
 
 pub use block::BlockState;
+pub use block_entity::{McBlockEntity, SignText};
 pub use chunk::{Chunk, ChunkFormat, Section};
 pub use level::LevelInfo;
 pub use region::{ChunkLocation, Region};
