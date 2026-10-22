@@ -21,6 +21,7 @@ use thiserror::Error;
 use crate::block_entity::{self, BeTemplate};
 use crate::catalog;
 use crate::mapping::Mapping;
+use crate::ocean;
 
 #[derive(Debug, Error)]
 pub enum ConvertError {
@@ -213,6 +214,8 @@ pub struct ConvertReport {
     pub block_entities: BTreeMap<String, usize>,
     /// Panneaux dont le texte a été repris.
     pub signs: usize,
+    /// Colonnes d'océan générées par Odasio (monde océan).
+    pub ocean_columns: usize,
     pub spawn: [i32; 3],
     pub elapsed: Duration,
 }
@@ -631,6 +634,28 @@ pub fn convert(
         }
         Ok(())
     })?;
+
+    if opts.world_type == WorldType::Ocean {
+        let written: std::collections::HashSet<(u32, u32)> =
+            surfaces.iter().map(|(key, _)| *key).collect();
+        let center = (MAP_CENTER / CHUNK_SIZE as i64) as u32;
+        let holes = ocean::holes(&written, (center, center));
+        // Dernière couche d'eau : celle de la mer Minecraft (Y = 62) une fois décalée.
+        let surface =
+            (MC_SEA_LEVEL - 1 + opts.y_offset).clamp(1, opts.map_size_y as i32 - 1) as usize;
+        let columns = ocean::ocean_columns(
+            &holes,
+            opts.map_size_y as usize / CHUNK_SIZE,
+            surface,
+            ocean::OceanBlocks::from_ids(&ids, top_rock),
+            light_tables.as_ref(),
+            top_rock,
+        )?;
+        for batch in columns.chunks(1024) {
+            db.write_columns(batch)?;
+        }
+        report.ocean_columns = holes.len();
+    }
 
     progress(Progress::Finishing);
     report.spawn = choose_spawn(world, opts, origin, &surfaces);

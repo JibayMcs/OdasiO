@@ -229,17 +229,12 @@ impl Column {
         let heights = self.height_map();
         let y_max = heights.iter().copied().max().unwrap_or(0);
         let mut w = ProtoWriter::new();
-        for &h in &heights {
-            w.uint(3, h as u64);
-        }
+        // Tableaux compactés (le décodeur du jeu accepte les deux encodages). La hauteur du
+        // terrain généré (champ 7) est omise : le jeu la recopie depuis la hauteur de pluie.
+        w.packed_uints(3, heights.iter().map(|&h| h as u64));
         w.uint(4, pass as u64);
-        for &h in &heights {
-            w.uint(7, h as u64);
-        }
         w.uint(10, y_max as u64);
-        for _ in 0..heights.len() {
-            w.uint(13, top_rock_id as u64);
-        }
+        w.packed_uints(13, heights.iter().map(|_| top_rock_id as u64));
         w.uint(16, 3);
         for pos in &self.placed_on_load {
             w.message(9, |m| {
@@ -304,6 +299,8 @@ mod tests {
             .unwrap();
         let y_max = map.iter().find(|f| f.number == 10).unwrap();
         assert_eq!(y_max.value.as_u64(), Some(40));
-        assert_eq!(map.iter().filter(|f| f.number == 3).count(), 1024);
+        let heights = map.iter().find(|f| f.number == 3).unwrap();
+        // Tableau compacté : 1024 varints, ici tous d'un octet sauf la colonne (5, 5).
+        assert_eq!(heights.value.as_bytes().unwrap().len(), 1024);
     }
 }

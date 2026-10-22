@@ -5,6 +5,7 @@ pub mod catalog;
 pub mod convert;
 pub mod inventory;
 pub mod mapping;
+pub mod ocean;
 pub mod paths;
 pub mod plan;
 

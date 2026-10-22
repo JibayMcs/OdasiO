@@ -44,6 +44,16 @@ impl ProtoWriter {
         self.uint(field, v as u64)
     }
 
+    /// Entiers répétés en encodage compacté : une étiquette et une longueur pour tout le
+    /// tableau, au lieu d'une étiquette par valeur.
+    pub fn packed_uints(&mut self, field: u32, values: impl IntoIterator<Item = u64>) -> &mut Self {
+        let mut inner = ProtoWriter::new();
+        for v in values {
+            inner.varint(v);
+        }
+        self.bytes(field, &inner.buf)
+    }
+
     pub fn bytes(&mut self, field: u32, data: &[u8]) -> &mut Self {
         self.tag(field, 2);
         self.varint(data.len() as u64);

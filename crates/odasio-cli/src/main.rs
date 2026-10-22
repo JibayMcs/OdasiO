@@ -410,6 +410,12 @@ fn convert(path: &Path, rock: Option<&str>, opts: &ConvertOptions) -> Result<()>
         report.skipped_chunks,
         report.clipped_blocks
     );
+    if report.ocean_columns > 0 {
+        println!(
+            "Océan : {} colonnes générées (trous et marge)",
+            report.ocean_columns
+        );
+    }
     println!(
         "Block entities : {} (dont {} panneaux avec texte)",
         report.block_entities.values().sum::<usize>(),
