@@ -4,6 +4,7 @@
 pub mod column;
 pub mod db;
 pub mod layer;
+pub mod light;
 pub mod proto;
 pub mod savegame;
 pub mod template;
@@ -11,6 +12,7 @@ pub mod tree;
 
 pub use column::{Column, EncodedColumn, LightSource, WorldGenPass};
 pub use db::{VsDatabase, position_key};
+pub use light::{LightTables, light_columns};
 pub use savegame::SaveGame;
 pub use template::{TemplateOptions, VsInstall};
 pub use tree::{Attr, BlockEntity, Tree};

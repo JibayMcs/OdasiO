@@ -40,3 +40,9 @@ all = { level = "warn", priority = -1 }
 lto = "thin"
 codegen-units = 1
 strip = true
+
+# Release avec symboles, pour perf : cargo build --profile profiling
+[profile.profiling]
+inherits = "release"
+strip = false
+debug = 1

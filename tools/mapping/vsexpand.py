@@ -165,6 +165,7 @@ def main(root, out):
     codes = set()
     entity = {}
     light = {}
+    absorption = {}
     errors = 0
     nfiles = 0
     for origin in ('game', 'survival', 'creative'):
@@ -207,6 +208,8 @@ def main(root, out):
                             variants.append(base + '-' + s)
                     allow = [wildcard(p) for p in ci(bt_, 'allowedVariants') or []]
                     skip = [wildcard(p) for p in ci(bt_, 'skipVariants') or []]
+                    la = ci(bt_, 'lightAbsorption')
+                    labt = [(wildcard(k), v) for k, v in (ci(bt_, 'lightAbsorptionByType') or {}).items()]
                     lh = ci(bt_, 'lightHsv')
                     lhbt = [(wildcard(k), v) for k, v in (ci(bt_, 'lightHsvByType') or {}).items()]
                     ec = ci(bt_, 'entityClass')
@@ -224,6 +227,13 @@ def main(root, out):
                                 break
                         if e:
                             entity['game:' + v.lower()] = e
+                        ab = la
+                        for r, val in labt:
+                            if r.match(v):
+                                ab = val
+                                break
+                        # Valeur par défaut du jeu : 99 (opaque), cf. BlockType.LightAbsorption.
+                        absorption['game:' + v.lower()] = 99 if ab is None else int(ab)
                         hsv = lh
                         for r, val in lhbt:
                             if r.match(v):
@@ -247,11 +257,18 @@ def main(root, out):
             for code in sorted(light):
                 f.write('%s\t%d\t%d\t%d\n' % (code, *light[code]))
         print('light sources', len(light), file=sys.stderr)
+    if len(sys.argv) > 5:
+        absorption['game:air'] = 0
+        with open(sys.argv[5], 'w') as f:
+            f.write('# code VS\tabsorption lumineuse (lightAbsorption), seules les valeurs autres que 99\n')
+            for code in sorted(absorption):
+                if absorption[code] != 99:
+                    f.write('%s\t%d\n' % (code, absorption[code]))
     with open(out, 'w') as f:
         f.write('\n'.join(sorted(codes)) + '\n')
     print('blocktypes', nfiles, 'codes', len(codes), 'parse errors', errors, file=sys.stderr)
 
 
 if __name__ == '__main__':
-    # Usage : vsexpand.py <dossier VS> <codes.txt> [entités.tsv|.json] [lumières.tsv]
+    # Usage : vsexpand.py <dossier VS> <codes.txt> [entités.tsv|.json] [lumières.tsv] [absorption.tsv]
     main(sys.argv[1], sys.argv[2])

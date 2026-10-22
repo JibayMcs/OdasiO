@@ -4,7 +4,9 @@ use std::time::Instant;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use odasio_core::mc::World;
-use odasio_core::{ConversionPlan, ConvertOptions, Inventory, Mapping, Progress, Quality};
+use odasio_core::{
+    ConversionPlan, ConvertOptions, Inventory, Lighting, Mapping, Progress, Quality, WorldType,
+};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
@@ -98,7 +100,29 @@ enum Command {
         /// Décalage vertical ajouté au Y Minecraft
         #[arg(long, default_value_t = 64)]
         y_offset: i32,
+        /// Terrain autour de la zone convertie
+        #[arg(long, value_enum, default_value_t = WorldTypeArg::Superflat)]
+        world_type: WorldTypeArg,
+        /// Qui calcule l'éclairage
+        #[arg(long, value_enum, default_value_t = LightingArg::Odasio)]
+        lighting: LightingArg,
     },
+}
+
+#[derive(Clone, Copy, clap::ValueEnum)]
+enum WorldTypeArg {
+    /// Plaine plate
+    Superflat,
+    /// Terrain, climat et végétation de Vintage Story
+    Standard,
+}
+
+#[derive(Clone, Copy, clap::ValueEnum)]
+enum LightingArg {
+    /// Calculé par Odasio (recommandé)
+    Odasio,
+    /// Calculé par le jeu au premier chargement (superflat uniquement)
+    Game,
 }
 
 fn main() -> Result<()> {
@@ -129,6 +153,8 @@ fn main() -> Result<()> {
             rock,
             height,
             y_offset,
+            world_type,
+            lighting,
         } => {
             let output = match out {
                 Some(out) => out,
@@ -143,6 +169,14 @@ fn main() -> Result<()> {
             opts.dimension = dimension;
             opts.map_size_y = height;
             opts.y_offset = y_offset;
+            opts.world_type = match world_type {
+                WorldTypeArg::Superflat => WorldType::Superflat,
+                WorldTypeArg::Standard => WorldType::Standard,
+            };
+            opts.lighting = match lighting {
+                LightingArg::Odasio => Lighting::Odasio,
+                LightingArg::Game => Lighting::Game,
+            };
             convert(&world, rock.as_deref(), &opts)?;
         }
     }

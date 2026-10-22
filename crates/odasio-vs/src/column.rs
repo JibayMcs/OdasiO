@@ -1,5 +1,6 @@
 //! Colonne de chunks 32x32 sur toute la hauteur du monde, prête à être écrite.
 
+use crate::light::{ChunkLight, SUN_BRIGHTNESS};
 use crate::proto::ProtoWriter;
 use crate::tree::BlockEntity;
 use crate::{CHUNK_CELLS, CHUNK_SIZE, Result, TARGET_GAME_VERSION, layer};
@@ -23,6 +24,16 @@ pub struct LightSource {
     pub block_id: u32,
 }
 
+/// Couche de lumière d'un chunk en plein soleil, identique partout : encodée une fois.
+fn full_sun_layer() -> Result<&'static (Vec<u8>, Vec<u8>)> {
+    static LAYER: std::sync::OnceLock<(Vec<u8>, Vec<u8>)> = std::sync::OnceLock::new();
+    if let Some(layer) = LAYER.get() {
+        return Ok(layer);
+    }
+    let encoded = layer::encode_light(&vec![SUN_BRIGHTNESS; CHUNK_CELLS])?;
+    Ok(LAYER.get_or_init(|| encoded))
+}
+
 pub fn index3d(x: usize, y: usize, z: usize) -> usize {
     (y * CHUNK_SIZE + z) * CHUNK_SIZE + x
 }
@@ -44,6 +55,9 @@ pub struct Column {
     /// Block entities à « poser » au premier chargement (`NewBlockEntities` du map chunk) :
     /// le jeu appelle leur `OnBlockPlaced`, par exemple pour lancer la croissance d'une pousse.
     pub placed_on_load: Vec<[i32; 3]>,
+    /// Lumière par chunk, calculée par [`crate::light::light_columns`]. Vide : le jeu
+    /// l'éclairera lui-même (passe Végétation, monde superflat).
+    pub light: Vec<ChunkLight>,
 }
 
 /// Blobs prêts pour la base : chunks par `cy` et map chunk.
@@ -65,6 +79,7 @@ impl Column {
             light_sources: Vec::new(),
             block_entities: Vec::new(),
             placed_on_load: Vec::new(),
+            light: Vec::new(),
         }
     }
 
@@ -103,18 +118,51 @@ impl Column {
             .map_or(0, |c| c[index3d(x, y % CHUNK_SIZE, z)])
     }
 
-    /// Plus haut bloc solide ou fluide par (x, z), ordre `z * 32 + x`.
-    fn height_map(&self) -> Vec<u16> {
-        let mut map = vec![0u16; CHUNK_SIZE * CHUNK_SIZE];
-        for z in 0..CHUNK_SIZE {
-            for x in 0..CHUNK_SIZE {
-                let top = (0..self.height())
-                    .rev()
-                    .find(|&y| self.block(x, y, z) != 0 || self.fluid(x, y, z) != 0);
-                map[z * CHUNK_SIZE + x] = top.unwrap_or(0) as u16;
+    /// Bloc et fluide d'une cellule (`cy`, index dans le chunk).
+    pub fn cell(&self, cy: usize, index: usize) -> (u32, u32) {
+        (
+            self.blocks[cy].as_ref().map_or(0, |c| c[index]),
+            self.fluids[cy].as_ref().map_or(0, |c| c[index]),
+        )
+    }
+
+    /// Plus haut Y occupé par un bloc ou un fluide.
+    pub fn top_y(&self) -> Option<usize> {
+        (0..self.blocks.len()).rev().find_map(|cy| {
+            let occupied = |i: usize| self.cell(cy, i) != (0, 0);
+            let top = (0..CHUNK_CELLS).rev().find(|&i| occupied(i))?;
+            Some(cy * CHUNK_SIZE + top / (CHUNK_SIZE * CHUNK_SIZE))
+        })
+    }
+
+    /// Plus haut bloc solide ou fluide par (x, z), ordre `z * 32 + x`, `None` si vide.
+    pub fn surface(&self) -> Vec<Option<u16>> {
+        let mut map = vec![None; CHUNK_SIZE * CHUNK_SIZE];
+        let mut remaining = map.len();
+        for cy in (0..self.blocks.len()).rev() {
+            if self.blocks[cy].is_none() && self.fluids[cy].is_none() {
+                continue;
+            }
+            for ly in (0..CHUNK_SIZE).rev() {
+                for z in 0..CHUNK_SIZE {
+                    for x in 0..CHUNK_SIZE {
+                        let slot = &mut map[z * CHUNK_SIZE + x];
+                        if slot.is_none() && self.cell(cy, index3d(x, ly, z)) != (0, 0) {
+                            *slot = Some((cy * CHUNK_SIZE + ly) as u16);
+                            remaining -= 1;
+                        }
+                    }
+                }
+                if remaining == 0 {
+                    return map;
+                }
             }
         }
         map
+    }
+
+    fn height_map(&self) -> Vec<u16> {
+        self.surface().into_iter().map(|h| h.unwrap_or(0)).collect()
     }
 
     pub fn encode(&self, pass: WorldGenPass, top_rock_id: u32) -> Result<EncodedColumn> {
@@ -127,11 +175,16 @@ impl Column {
             let is_empty = blocks.iter().all(|&v| v == 0) && fluids.iter().all(|&v| v == 0);
             non_air |= !is_empty;
 
+            // Lumière vide : calculée par le jeu (passe Végétation) ou roche sans lumière.
+            let (planes, palette) = match self.light.get(cy) {
+                None | Some(ChunkLight::Dark) => (Vec::new(), Vec::new()),
+                Some(ChunkLight::FullSun) => full_sun_layer()?.clone(),
+                Some(ChunkLight::Cells(cells)) => layer::encode_light(cells)?,
+            };
             let mut w = ProtoWriter::new();
             w.bytes(1, &layer::encode(blocks)?)
-                // Lumière vide : calculée par le jeu (passe Végétation) ou absente.
-                .bytes(2, &[])
-                .bytes(3, &[])
+                .bytes(2, &planes)
+                .bytes(3, &palette)
                 .string(12, TARGET_GAME_VERSION)
                 // Version 1 : même codec que la 2, mais le jeu « met à niveau » le chunk au
                 // premier dépaquetage (UpdateForVersion), ce qui le marque à sauvegarder et
@@ -142,6 +195,21 @@ impl Column {
                 .bytes(16, &layer::encode(fluids)?);
             if is_empty {
                 w.bool(13, true);
+            }
+            // Positions des sources de lumière : le jeu s'en sert pour recalculer la lumière
+            // quand un bloc voisin change ou qu'une source est retirée.
+            if !self.light.is_empty() {
+                for source in &self.light_sources {
+                    if source.pos[1].div_euclid(CHUNK_SIZE as i32) == cy as i32 {
+                        let local = |v: i32| v.rem_euclid(CHUNK_SIZE as i32) as usize;
+                        let index = index3d(
+                            local(source.pos[0]),
+                            local(source.pos[1]),
+                            local(source.pos[2]),
+                        );
+                        w.uint(10, index as u64);
+                    }
+                }
             }
             // Une block entity vit dans le chunk qui contient sa position.
             let entities: Vec<&BlockEntity> = self
@@ -178,7 +246,8 @@ impl Column {
                 m.int32(1, pos[0]).int32(2, pos[1]).int32(3, pos[2]);
             });
         }
-        for source in &self.light_sources {
+        // Sources à allumer par le jeu, seulement s'il calcule lui-même l'éclairage.
+        for source in self.light_sources.iter().filter(|_| self.light.is_empty()) {
             w.message(17, |m| {
                 m.int32(1, source.pos[0])
                     .int32(2, source.pos[1])

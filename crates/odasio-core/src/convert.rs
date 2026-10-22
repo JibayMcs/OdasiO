@@ -12,8 +12,8 @@ use std::time::{Duration, Instant};
 
 use odasio_mc::{BlockState, Chunk, Region, SignText, World};
 use odasio_vs::{
-    CHUNK_SIZE, Column, DEFAULT_MAP_SIZE_XZ, EncodedColumn, LightSource, TemplateOptions,
-    VsDatabase, VsInstall, WorldGenPass, template,
+    CHUNK_SIZE, Column, DEFAULT_MAP_SIZE_XZ, EncodedColumn, LightSource, LightTables,
+    TemplateOptions, VsDatabase, VsInstall, WorldGenPass, light_columns, template,
 };
 use rayon::prelude::*;
 use thiserror::Error;
@@ -36,11 +36,41 @@ pub enum ConvertError {
     OutputExists(PathBuf),
     #[error("Vintage Story introuvable : installez le jeu ou indiquez un monde modèle")]
     NoVintageStory,
+    #[error("l'éclairage par le jeu n'est possible qu'en monde superflat")]
+    GameLightingNeedsSuperflat,
     #[error("hauteur du monde modèle ({template}) différente de celle demandée ({wanted})")]
     HeightMismatch { template: u32, wanted: u32 },
 }
 
 pub type Result<T> = std::result::Result<T, ConvertError>;
+
+/// Type du monde Vintage Story produit.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WorldType {
+    /// Plaine plate autour de la zone convertie.
+    Superflat,
+    /// Terrain, climat et végétation de Vintage Story autour de la zone convertie.
+    Standard,
+}
+
+impl WorldType {
+    pub fn code(self) -> &'static str {
+        match self {
+            WorldType::Superflat => "superflat",
+            WorldType::Standard => "standard",
+        }
+    }
+}
+
+/// Qui calcule l'éclairage des colonnes converties.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Lighting {
+    /// Odasio : colonnes terminées dès l'écriture, quel que soit le type de monde.
+    Odasio,
+    /// Le jeu, au premier chargement (monde superflat uniquement : en monde standard, la
+    /// passe qui éclaire ferait aussi pousser arbres et structures sur le terrain converti).
+    Game,
+}
 
 #[derive(Debug, Clone)]
 pub struct ConvertOptions {
@@ -54,6 +84,8 @@ pub struct ConvertOptions {
     pub map_size_y: u32,
     /// Ajouté au Y Minecraft (64 : le fond du monde 1.18+, Y = -64, devient Y = 0).
     pub y_offset: i32,
+    pub world_type: WorldType,
+    pub lighting: Lighting,
 }
 
 impl ConvertOptions {
@@ -66,6 +98,8 @@ impl ConvertOptions {
             template: None,
             map_size_y: 384,
             y_offset: 64,
+            world_type: WorldType::Superflat,
+            lighting: Lighting::Odasio,
         }
     }
 }
@@ -208,6 +242,7 @@ fn convert_region(
     opts: &ConvertOptions,
     origin: [i64; 2],
     top_rock: u32,
+    light: Option<&LightTables>,
 ) -> Result<RegionResult> {
     let mut region = Region::open(path)?;
     let height_chunks = (opts.map_size_y as usize) / CHUNK_SIZE;
@@ -339,7 +374,9 @@ fn convert_region(
         }
     }
 
-    for (key, mut column) in columns {
+    let mut columns: Vec<Column> = columns.into_values().collect();
+    for column in &mut columns {
+        let key = (column.cx, column.cz);
         for (x, y, z, id) in fluid_lights.remove(&key).unwrap_or_default() {
             let covered = y + 1 < column.height() && column.fluid(x, y + 1, z) == id;
             if !covered {
@@ -358,9 +395,17 @@ fn convert_region(
             .find(|&y| column.block(16, y, 16) != 0 || column.fluid(16, y, 16) != 0)
             .unwrap_or(0) as u16;
         result.surface.push((key, surface));
-        result
-            .columns
-            .push(column.encode(WorldGenPass::Vegetation, top_rock)?);
+    }
+    // La région entière est éclairée d'un coup : la lumière passe d'une colonne à l'autre.
+    let pass = match light {
+        Some(tables) => {
+            light_columns(&mut columns, tables);
+            WorldGenPass::Done
+        }
+        None => WorldGenPass::Vegetation,
+    };
+    for column in &columns {
+        result.columns.push(column.encode(pass, top_rock)?);
     }
     Ok(result)
 }
@@ -384,6 +429,7 @@ fn prepare_output(opts: &ConvertOptions, progress: &(impl Fn(Progress) + Sync)) 
             let template_opts = TemplateOptions {
                 world_name: opts.world_name.clone(),
                 map_size_y: opts.map_size_y,
+                world_type: opts.world_type.code().into(),
                 ..Default::default()
             };
             let generated =
@@ -408,6 +454,9 @@ pub fn convert(
         .dimension(&opts.dimension)
         .ok_or_else(|| ConvertError::MissingDimension(opts.dimension.clone()))?;
     let files = dimension.region_files()?;
+    if opts.lighting == Lighting::Game && opts.world_type != WorldType::Superflat {
+        return Err(ConvertError::GameLightingNeedsSuperflat);
+    }
 
     prepare_output(opts, &progress)?;
     let mut db = VsDatabase::open(&opts.output)?;
@@ -420,6 +469,7 @@ pub fn convert(
     }
     let ids = db.save.block_ids()?;
     let origin = origin(world, &files);
+    let light_tables = (opts.lighting == Lighting::Odasio).then(|| light_tables(&ids));
     let top_rock = ids
         .get(&format!("game:rock-{}", mapping.settings.rock))
         .copied()
@@ -445,7 +495,14 @@ pub fn convert(
                     templates: Vec::new(),
                 },
                 |resolver, file| {
-                    let _ = tx.send(convert_region(file, resolver, opts, origin, top_rock));
+                    let _ = tx.send(convert_region(
+                        file,
+                        resolver,
+                        opts,
+                        origin,
+                        top_rock,
+                        light_tables.as_ref(),
+                    ));
                 },
             );
             drop(tx);
@@ -480,6 +537,22 @@ pub fn convert(
     report.missing_codes = missing.into_inner().unwrap();
     report.elapsed = started.elapsed();
     Ok(report)
+}
+
+/// Absorption et émission de lumière des blocs, indexées par ID du monde modèle.
+fn light_tables(ids: &HashMap<String, u32>) -> LightTables {
+    let size = ids.values().copied().max().unwrap_or(0) as usize + 1;
+    let mut tables = LightTables {
+        absorption: vec![99; size],
+        emission: vec![[0; 3]; size],
+    };
+    for (code, &id) in ids {
+        tables.absorption[id as usize] = catalog::vs_absorption(code);
+        if let Some(hsv) = catalog::vs_light(code) {
+            tables.emission[id as usize] = hsv;
+        }
+    }
+    tables
 }
 
 /// Spawn Minecraft s'il est connu, sinon centre de la zone convertie, posé sur le sol.

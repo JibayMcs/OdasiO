@@ -134,6 +134,43 @@ pub fn decode(blob: &[u8]) -> Result<Vec<u32>> {
     Ok(out)
 }
 
+/// Encode une couche de lumière (champs 2 et 3 d'un chunk) : plans de bits et palette,
+/// compressés séparément. La palette n'est pas complétée à une puissance de deux.
+pub fn encode_light(cells: &[u32]) -> Result<(Vec<u8>, Vec<u8>)> {
+    debug_assert_eq!(cells.len(), CHUNK_CELLS);
+    let mut palette = vec![0u32];
+    let mut lookup: HashMap<u32, u32> = HashMap::from([(0, 0)]);
+    let mut indices = vec![0u32; CHUNK_CELLS];
+    // La lumière se répète par longues séries : la dernière valeur évite la table.
+    let mut last = (0u32, 0u32);
+    for (slot, &value) in indices.iter_mut().zip(cells) {
+        if value != last.0 {
+            let index = *lookup.entry(value).or_insert_with(|| {
+                palette.push(value);
+                (palette.len() - 1) as u32
+            });
+            last = (value, index);
+        }
+        *slot = last.1;
+    }
+    if palette.len() == 1 {
+        return Ok((Vec::new(), Vec::new()));
+    }
+    let nbits = bits_for(palette.len());
+    let mut planes = vec![0u32; nbits * PLANE_WORDS];
+    for (i, &p) in indices.iter().enumerate() {
+        for k in 0..nbits {
+            if (p >> k) & 1 == 1 {
+                planes[k * PLANE_WORDS + (i >> 5)] |= 1 << (i & 31);
+            }
+        }
+    }
+    Ok((
+        zstd_compress(&le_bytes(planes))?,
+        zstd_compress(&le_bytes(palette))?,
+    ))
+}
+
 /// Décode la couche de lumière (champs 2 et 3 d'un chunk : plans de bits et palette,
 /// compressés séparément). Renvoie `None` si la colonne n'a pas encore été éclairée.
 pub fn decode_light(planes: &[u8], palette: &[u8]) -> Result<Option<Vec<u32>>> {
@@ -188,6 +225,17 @@ mod tests {
         let blob = encode(&cells).unwrap();
         assert!(i32::from_le_bytes(blob[..4].try_into().unwrap()) > 0);
         assert_eq!(decode(&blob).unwrap(), cells);
+    }
+
+    #[test]
+    fn light_layer_roundtrips() {
+        let cells: Vec<u32> = (0..CHUNK_CELLS as u32)
+            .map(|i| [22, 21, 266710, 0, 5][(i % 5) as usize])
+            .collect();
+        let (planes, palette) = encode_light(&cells).unwrap();
+        assert_eq!(decode_light(&planes, &palette).unwrap().unwrap(), cells);
+        let (planes, palette) = encode_light(&vec![0; CHUNK_CELLS]).unwrap();
+        assert!(planes.is_empty() && palette.is_empty());
     }
 
     #[test]

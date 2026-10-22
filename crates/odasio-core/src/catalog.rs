@@ -6,6 +6,7 @@ use std::sync::OnceLock;
 static CODES_TXT: &str = include_str!("../../../assets/vs_block_codes.txt");
 static LIGHT_TSV: &str = include_str!("../../../assets/vs_block_light.tsv");
 static ENTITIES_TSV: &str = include_str!("../../../assets/vs_block_entities.tsv");
+static ABSORPTION_TSV: &str = include_str!("../../../assets/vs_block_absorption.tsv");
 
 /// Ensemble trié des codes VS 1.22.7 (`game:rock-granite`...).
 pub fn vs_codes() -> &'static BTreeSet<String> {
@@ -47,6 +48,25 @@ pub fn vs_light(code: &str) -> Option<[u8; 3]> {
         .copied()
 }
 
+/// Absorption lumineuse d'un bloc VS (`lightAbsorption`, 99 = opaque par défaut).
+pub fn vs_absorption(code: &str) -> u8 {
+    static VALUES: OnceLock<std::collections::HashMap<&'static str, u8>> = OnceLock::new();
+    VALUES
+        .get_or_init(|| {
+            ABSORPTION_TSV
+                .lines()
+                .filter(|l| !l.starts_with('#'))
+                .filter_map(|l| {
+                    let (code, value) = l.split_once('\t')?;
+                    Some((code, value.parse().ok()?))
+                })
+                .collect()
+        })
+        .get(code)
+        .copied()
+        .unwrap_or(99)
+}
+
 /// Classe de block entity d'un bloc VS (`entityClass` de son blocktype).
 pub fn vs_entity_class(code: &str) -> Option<&'static str> {
     static CLASSES: OnceLock<std::collections::HashMap<&'static str, &'static str>> =
@@ -84,6 +104,13 @@ mod tests {
         assert!(vs_code_exists("game:air"));
         assert!(vs_code_exists("game:rock-granite"));
         assert!(!vs_code_exists("game:rock-cheese"));
+    }
+
+    #[test]
+    fn absorption_defaults_to_opaque() {
+        assert_eq!(vs_absorption("game:air"), 0);
+        assert_eq!(vs_absorption("game:water-still-7"), 1);
+        assert_eq!(vs_absorption("game:rock-granite"), 99);
     }
 
     #[test]
