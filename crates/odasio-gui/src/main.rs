@@ -1,3 +1,6 @@
+// Sous Windows, pas de fenêtre de console derrière l'application (sauf en debug).
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod app;
 mod i18n;
 mod recent;

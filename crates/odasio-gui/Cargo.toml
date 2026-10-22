@@ -5,6 +5,9 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 authors.workspace = true
+description = "Minecraft to Vintage Story world converter"
+repository = "https://github.com/JibayMcs/OdasiO"
+homepage = "https://github.com/JibayMcs/OdasiO"
 
 [dependencies]
 anyhow.workspace = true
@@ -29,6 +32,33 @@ flate2 = "1.1"
 self-replace = "1.5"
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
+
+[package.metadata.deb]
+name = "odasio"
+maintainer = "JibayMcs"
+copyright = "2026, JibayMcs"
+license-file = ["../../LICENSE-MIT", "0"]
+extended-description = """\
+Converts Minecraft Java worlds to Vintage Story worlds, and Vintage Story
+saves back to Minecraft, with a 3D side-by-side preview of both worlds.
+Includes the OdasiO desktop app and the odasio command line."""
+section = "games"
+priority = "optional"
+depends = "$auto"
+recommends = "xdg-desktop-portal, pkexec | policykit-1"
+assets = [
+    ["target/release/odasio-gui", "usr/bin/", "755"],
+    ["target/release/odasio", "usr/bin/", "755"],
+    ["../../packaging/linux/odasio.desktop", "usr/share/applications/", "644"],
+    ["../../packaging/icons/hicolor/16x16/apps/odasio.png", "usr/share/icons/hicolor/16x16/apps/", "644"],
+    ["../../packaging/icons/hicolor/32x32/apps/odasio.png", "usr/share/icons/hicolor/32x32/apps/", "644"],
+    ["../../packaging/icons/hicolor/48x48/apps/odasio.png", "usr/share/icons/hicolor/48x48/apps/", "644"],
+    ["../../packaging/icons/hicolor/64x64/apps/odasio.png", "usr/share/icons/hicolor/64x64/apps/", "644"],
+    ["../../packaging/icons/hicolor/128x128/apps/odasio.png", "usr/share/icons/hicolor/128x128/apps/", "644"],
+    ["../../packaging/icons/hicolor/256x256/apps/odasio.png", "usr/share/icons/hicolor/256x256/apps/", "644"],
+    ["../../packaging/icons/hicolor/512x512/apps/odasio.png", "usr/share/icons/hicolor/512x512/apps/", "644"],
+    ["../../README.md", "usr/share/doc/odasio/", "644"],
+]
 
 [lints]
 workspace = true

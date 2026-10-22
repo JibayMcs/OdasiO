@@ -1,0 +1,98 @@
+# Publication d'une version : poussez un tag vX.Y.Z (égal à la version de Cargo.toml).
+# Produit le paquet .deb, l'archive Linux portable, l'installateur Windows et SHA256SUMS,
+# fichiers attendus par les mises à jour intégrées (crates/odasio-gui/src/update.rs).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux:
+    name: Linux (.deb et archive)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          CARGO=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "odasio-gui") | .version')
+          if [ "$VERSION" != "$CARGO" ]; then
+            echo "::error::Le tag v$VERSION ne correspond pas à la version $CARGO de Cargo.toml"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Compilation
+        run: cargo build --release --workspace --locked
+      - name: Paquet .deb
+        run: |
+          cargo install cargo-deb --locked
+          cargo deb -p odasio-gui --no-build
+      - name: Fichiers de la version
+        run: |
+          mkdir -p dist
+          cp target/debian/*.deb "dist/odasio_${VERSION}_amd64.deb"
+          DIR="odasio-${VERSION}-linux-x86_64"
+          mkdir -p "$DIR"
+          cp target/release/odasio-gui target/release/odasio "$DIR/"
+          cp README.md README.fr.md LICENSE-MIT LICENSE-APACHE packaging/linux/odasio.desktop "$DIR/"
+          cp packaging/icons/hicolor/256x256/apps/odasio.png "$DIR/"
+          tar czf "dist/${DIR}.tar.gz" "$DIR"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: dist/*
+
+  windows:
+    name: Windows (installateur)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Compilation
+        run: cargo build --release --workspace --locked
+      - name: Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup --no-progress -y
+          }
+          & $iscc "/DAppVersion=$env:VERSION" "/DSourceDir=$env:GITHUB_WORKSPACE\target\release" packaging\windows\odasio.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*.exe
+
+  publish:
+    name: Publication
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Empreintes
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: OdasiO ${{ github.ref_name }}
+          files: dist/*
+          generate_release_notes: true

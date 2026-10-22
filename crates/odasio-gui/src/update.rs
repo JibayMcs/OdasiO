@@ -233,7 +233,7 @@ pub fn apply(install: Install, file: &Path) -> Result<Applied> {
         Install::WindowsInstaller => {
             // L'installateur ferme OdasiO, remplace les fichiers et le relance.
             Command::new(file)
-                .args(["/SILENT", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS"])
+                .args(["/SILENT", "/CLOSEAPPLICATIONS"])
                 .spawn()
                 .context("lancement de l'installateur")?;
             Ok(Applied::Exit)
