@@ -315,6 +315,23 @@ impl VsAssets {
         None
     }
 
+    /// Moitiés gauche (frange des côtés) et droite (dessus) d'une texture de couverture
+    /// d'herbe ; une texture carrée sert aux deux.
+    fn cover_halves(&self, base: &str) -> Option<(Arc<Texture>, Arc<Texture>)> {
+        let bytes = std::fs::read(self.asset_file("textures", base, "png")?).ok()?;
+        let image = image::load_from_memory(&bytes).ok()?;
+        let (w, h) = (image.width(), image.height());
+        if w >= 2 * h {
+            Some((
+                Arc::new(Texture::from_png_crop(&bytes, 0, 0, h)?),
+                Arc::new(Texture::from_png_crop(&bytes, h, 0, h)?),
+            ))
+        } else {
+            let whole = Arc::new(Texture::from_png(&bytes)?);
+            Some((whole.clone(), whole))
+        }
+    }
+
     fn texture(&self, base: &str) -> Option<Arc<Texture>> {
         if let Some(t) = self.textures.lock().unwrap().get(base) {
             return t.clone();
@@ -655,40 +672,47 @@ impl VsAssets {
             };
             // VS tourne dans le sens trigonométrique vu de dessus, Minecraft dans l'autre.
             let (rx, ry) = (angle("rotateX"), -angle("rotateY"));
-            if let Some(look) = self.shape_look(shape_json, rx, ry, &|key| {
-                let leaves = code.starts_with("leaves");
-                face(resolve(key), if leaves { tint } else { None })
-            }) {
+            // Teinte climatique (herbes, fougères, feuillages) sur toutes les faces.
+            if let Some(look) = self.shape_look(shape_json, rx, ry, &|key| face(resolve(key), tint))
+            {
                 return Some(look);
             }
         }
 
         let mut top = face(pick(&["up", "verticals", "all"]), None)?;
-        // Herbe : couverture superposée au dessus du sol.
+        let mut south = face(pick(&["south", "horizontals", "sides", "all"]), None)?;
+        let mut east = face(pick(&["east", "horizontals", "sides", "all"]), None)?;
+        // Herbe : la texture de couverture est double, frange des côtés à gauche et dessus à
+        // droite ; chaque moitié est superposée à la terre, teintée.
         if let Some(cover) = textures
             .iter()
             .find(|(k, _)| k.eq_ignore_ascii_case("specialSecondTexture"))
             .and_then(|(_, v)| base_of(v))
             && !code.ends_with("-none")
-            && let Some(cover) = self.texture(&cover)
+            && let Some((side_cover, top_cover)) = self.cover_halves(&cover)
         {
+            let tint = tint.unwrap_or([255; 3]);
             top = Face {
-                texture: Arc::new(composite(&top.texture, &cover, tint.unwrap_or([255; 3]))),
+                texture: Arc::new(composite(&top.texture, &top_cover, tint)),
+                tint: None,
+            };
+            let side = Arc::new(composite(&south.texture, &side_cover, tint));
+            south = Face {
+                texture: side.clone(),
+                tint: None,
+            };
+            east = Face {
+                texture: side,
                 tint: None,
             };
         } else if tint.is_some() && draw != "json" {
             top.tint = tint;
         }
-        let side_tint = if code.starts_with("leaves") {
-            tint
-        } else {
-            None
-        };
         if code.starts_with("leaves") {
             top.tint = tint;
+            south.tint = tint;
+            east.tint = tint;
         }
-        let south = face(pick(&["south", "horizontals", "sides", "all"]), side_tint)?;
-        let east = face(pick(&["east", "horizontals", "sides", "all"]), side_tint)?;
 
         let (mut min, mut max) = ([0.0f32; 3], [1.0f32; 3]);
         if let Some(n) = code
@@ -759,15 +783,12 @@ fn first_face_texture(shape: &Value) -> Option<String> {
 /// Superpose `cover` (teintée) sur `base`, à la taille de `base`.
 fn composite(base: &Texture, cover: &Texture, tint: [u8; 3]) -> Texture {
     let mut out = base.clone();
-    let size = base.size as usize;
-    for y in 0..size {
-        for x in 0..size {
-            let c = cover.sample(
-                (x as f32 + 0.5) / size as f32,
-                (y as f32 + 0.5) / size as f32,
-            );
+    let (w, h) = (base.width as usize, base.height as usize);
+    for y in 0..h {
+        for x in 0..w {
+            let c = cover.sample((x as f32 + 0.5) / w as f32, (y as f32 + 0.5) / h as f32);
             let a = c[3] as u32;
-            let i = (y * size + x) * 4;
+            let i = (y * w + x) * 4;
             for k in 0..3 {
                 let tinted = c[k] as u32 * tint[k] as u32 / 255;
                 out.rgba[i + k] = ((tinted * a + out.rgba[i + k] as u32 * (255 - a)) / 255) as u8;

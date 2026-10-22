@@ -131,7 +131,7 @@ impl McAssets {
         if let Some(t) = self.textures.lock().unwrap().get(path) {
             return Some(t.clone());
         }
-        let texture = Arc::new(Texture::from_png(
+        let texture = Arc::new(Texture::from_png_first_frame(
             &self.read(&format!("assets/minecraft/textures/{path}.png"))?,
         )?);
         self.textures

@@ -2,33 +2,61 @@
 
 use std::sync::Arc;
 
-/// Texture RGBA carrée (la première image des textures animées).
+/// Texture RGBA.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Texture {
-    pub size: u32,
+    pub width: u32,
+    pub height: u32,
     pub rgba: Vec<u8>,
 }
 
 impl Texture {
+    /// Image entière.
     pub fn from_png(bytes: &[u8]) -> Option<Self> {
         let image = image::load_from_memory(bytes).ok()?.to_rgba8();
-        let size = image.width().min(image.height());
-        if size == 0 {
+        let (width, height) = image.dimensions();
+        Self::crop(&image, 0, 0, width, height)
+    }
+
+    /// Première image d'une texture animée de Minecraft (bande verticale d'images carrées).
+    pub fn from_png_first_frame(bytes: &[u8]) -> Option<Self> {
+        let image = image::load_from_memory(bytes).ok()?.to_rgba8();
+        let (width, height) = image.dimensions();
+        let height = if height > width && height % width == 0 {
+            width
+        } else {
+            height
+        };
+        Self::crop(&image, 0, 0, width, height)
+    }
+
+    /// Carré de `size` pixels pris en (`x`, `y`) dans une image (texture double, etc.).
+    pub fn from_png_crop(bytes: &[u8], x: u32, y: u32, size: u32) -> Option<Self> {
+        let image = image::load_from_memory(bytes).ok()?.to_rgba8();
+        Self::crop(&image, x, y, size, size)
+    }
+
+    fn crop(image: &image::RgbaImage, x: u32, y: u32, width: u32, height: u32) -> Option<Self> {
+        if width == 0 || height == 0 || x + width > image.width() || y + height > image.height() {
             return None;
         }
-        // Texture animée : bande verticale d'images carrées, on garde la première.
-        let mut rgba = Vec::with_capacity((size * size * 4) as usize);
-        for y in 0..size {
-            for x in 0..size {
-                rgba.extend_from_slice(&image.get_pixel(x, y).0);
+        let mut rgba = Vec::with_capacity((width * height * 4) as usize);
+        for py in y..y + height {
+            for px in x..x + width {
+                rgba.extend_from_slice(&image.get_pixel(px, py).0);
             }
         }
-        Some(Self { size, rgba })
+        Some(Self {
+            width,
+            height,
+            rgba,
+        })
     }
 
     pub fn solid(color: [u8; 4]) -> Self {
         Self {
-            size: 1,
+            width: 1,
+            height: 1,
             rgba: color.to_vec(),
         }
     }
@@ -36,10 +64,9 @@ impl Texture {
     /// Pixel aux coordonnées normalisées (0..1).
     #[inline]
     pub fn sample(&self, u: f32, v: f32) -> [u8; 4] {
-        let max = self.size as f32 - 0.001;
-        let x = (u * self.size as f32).clamp(0.0, max) as usize;
-        let y = (v * self.size as f32).clamp(0.0, max) as usize;
-        let i = (y * self.size as usize + x) * 4;
+        let x = (u * self.width as f32).clamp(0.0, self.width as f32 - 0.001) as usize;
+        let y = (v * self.height as f32).clamp(0.0, self.height as f32 - 0.001) as usize;
+        let i = (y * self.width as usize + x) * 4;
         [
             self.rgba[i],
             self.rgba[i + 1],
