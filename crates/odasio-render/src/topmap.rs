@@ -14,12 +14,33 @@ pub const REGION: usize = 512;
 /// Bit de `RegionMap::top` marquant un chunk incomplet (ignoré par la conversion).
 pub const INCOMPLETE: u16 = 0x8000;
 
-/// Une région : index de palette du bloc du dessus (0 = rien) et ombrage par colonne,
-/// ordre `z * 512 + x`.
+/// Une région : index de palette du bloc du dessus (0 = rien) et altitude de ce bloc
+/// (`i16::MIN` = rien), par colonne, ordre `z * 512 + x`.
 pub struct RegionMap {
     pub top: Vec<u16>,
-    /// Relief : 0 plus bas que le voisin nord, 1 à niveau, 2 plus haut.
-    pub shade: Vec<u8>,
+    pub height: Vec<i16>,
+}
+
+impl RegionMap {
+    /// Relief d'une colonne par rapport au voisin nord (comme les cartes de Minecraft) :
+    /// 0 plus bas, 1 à niveau, 2 plus haut.
+    pub fn shade(&self, x: usize, z: usize) -> u8 {
+        if z == 0 {
+            return 1;
+        }
+        let (h, north) = (
+            self.height[z * REGION + x],
+            self.height[(z - 1) * REGION + x],
+        );
+        if h == i16::MIN || north == i16::MIN {
+            return 1;
+        }
+        match h.cmp(&north) {
+            std::cmp::Ordering::Less => 0,
+            std::cmp::Ordering::Equal => 1,
+            std::cmp::Ordering::Greater => 2,
+        }
+    }
 }
 
 pub struct TopMap {
@@ -112,6 +133,17 @@ impl TopMap {
         })
     }
 
+    /// Altitude du bloc du dessus de la colonne (`x`, `z`).
+    pub fn height(&self, x: i32, z: i32) -> Option<i32> {
+        let region = self
+            .regions
+            .get(&(x.div_euclid(REGION as i32), z.div_euclid(REGION as i32)))?;
+        let i =
+            z.rem_euclid(REGION as i32) as usize * REGION + x.rem_euclid(REGION as i32) as usize;
+        let h = region.height[i];
+        (h != i16::MIN).then_some(h as i32)
+    }
+
     /// Index de palette (et chunk incomplet) de la colonne (`x`, `z`).
     pub fn column(&self, x: i32, z: i32) -> Option<(u16, bool)> {
         let region = self
@@ -184,20 +216,5 @@ fn read_region(
     if !any {
         return Ok(None);
     }
-    // Relief : comparaison avec le voisin nord, comme les cartes de Minecraft.
-    let mut shade = vec![1u8; REGION * REGION];
-    for z in 1..REGION {
-        for x in 0..REGION {
-            let (h, north) = (height[z * REGION + x], height[(z - 1) * REGION + x]);
-            if h == i16::MIN || north == i16::MIN {
-                continue;
-            }
-            shade[z * REGION + x] = match h.cmp(&north) {
-                std::cmp::Ordering::Less => 0,
-                std::cmp::Ordering::Equal => 1,
-                std::cmp::Ordering::Greater => 2,
-            };
-        }
-    }
-    Ok(Some(RegionMap { top, shade }))
+    Ok(Some(RegionMap { top, height }))
 }

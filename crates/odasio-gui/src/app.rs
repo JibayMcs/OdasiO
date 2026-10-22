@@ -89,6 +89,8 @@ pub struct OdasioApp {
     pub mapping_rev: u64,
     pub mapping_view: views::mapping::ViewState,
     pub preview: views::preview::ViewState,
+    /// Accès au GPU (wgpu, partagé avec egui) pour l'aperçu 3D.
+    pub render_state: Option<eframe::egui_wgpu::RenderState>,
     window_fitted: bool,
     pub form: ConvertForm,
     pub convert: Option<Task<Arc<ConvertReport>>>,
@@ -113,6 +115,7 @@ impl OdasioApp {
             mapping_rev: 0,
             mapping_view: Default::default(),
             preview: Default::default(),
+            render_state: cc.wgpu_render_state.clone(),
             window_fitted: false,
             form: ConvertForm {
                 world_name: String::new(),

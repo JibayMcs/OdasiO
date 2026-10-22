@@ -3,7 +3,7 @@
 
 use odasio_mc::World;
 use odasio_render::mc_assets::{McAssets, detect_client_jar};
-use odasio_render::topmap::{REGION, TopMap};
+use odasio_render::topmap::TopMap;
 use odasio_render::vs_assets::{VsAssets, detect_vs_assets};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -54,8 +54,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let color = match map.column(x, z) {
                     Some((id, incomplete)) if !(water && incomplete) => {
                         let region = &map.regions[&(x.div_euclid(512), z.div_euclid(512))];
-                        let i = z.rem_euclid(512) as usize * REGION + x.rem_euclid(512) as usize;
-                        let shade = [0.82, 1.0, 1.12][region.shade[i] as usize];
+                        let (lx, lz) = (x.rem_euclid(512) as usize, z.rem_euclid(512) as usize);
+                        let shade = [0.82, 1.0, 1.12][region.shade(lx, lz) as usize];
                         colors[id as usize]
                             .unwrap_or([255, 0, 255])
                             .map(|c| (c as f32 * shade).min(255.0) as u8)

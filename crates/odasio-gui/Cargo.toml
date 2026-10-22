@@ -8,8 +8,11 @@ authors.workspace = true
 
 [dependencies]
 anyhow.workspace = true
-eframe = "0.32.3"
+eframe = { version = "0.32.3", features = ["wgpu"] }
 egui_extras = { version = "0.32.3", features = ["all_loaders"] }
+glam = "0.30"
+bytemuck = { version = "1.25.2", features = ["derive"] }
+rayon = "1.12.0"
 image = { version = "0.25.9", default-features = false, features = ["png"] }
 odasio-core.workspace = true
 odasio-render.workspace = true

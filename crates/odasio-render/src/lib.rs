@@ -5,7 +5,9 @@ pub mod area;
 pub mod iso;
 pub mod look;
 pub mod mc_assets;
+pub mod mesh;
 pub mod topmap;
+pub mod voxel;
 pub mod vs_assets;
 
 pub use look::{BlockLook, Face, Shape, Texture};

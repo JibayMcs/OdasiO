@@ -16,6 +16,7 @@ fn main() -> eframe::Result {
 
     let options = eframe::NativeOptions {
         centered: true,
+        renderer: eframe::Renderer::Wgpu,
         viewport: egui::ViewportBuilder::default()
             .with_title(odasio_core::APP_NAME)
             .with_app_id("odasio")
