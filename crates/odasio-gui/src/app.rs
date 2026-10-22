@@ -309,7 +309,7 @@ impl OdasioApp {
                         egui::Color32::TRANSPARENT
                     })
                     .stroke(if current {
-                        Stroke::new(1.0, p.accent.gamma_multiply(0.6))
+                        Stroke::new(1.0_f32, p.accent.gamma_multiply(0.6))
                     } else {
                         Stroke::NONE
                     });

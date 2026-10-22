@@ -239,7 +239,7 @@ pub fn show_world(app: &mut OdasioApp, ui: &mut Ui) {
                     ui.painter().rect_stroke(
                         response.rect,
                         theme::RADIUS,
-                        egui::Stroke::new(1.5, p.accent),
+                        egui::Stroke::new(1.5_f32, p.accent),
                         egui::StrokeKind::Inside,
                     );
                 }

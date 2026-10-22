@@ -300,7 +300,7 @@ pub fn picker(app: &mut OdasioApp, ctx: &egui::Context) -> bool {
     let p = Palette::of_ctx(ctx);
     let frame = egui::Frame::new()
         .fill(p.card)
-        .stroke(egui::Stroke::new(1.0, p.border))
+        .stroke(egui::Stroke::new(1.0_f32, p.border))
         .corner_radius(theme::RADIUS)
         .inner_margin(22)
         .shadow(ctx.style().visuals.popup_shadow);

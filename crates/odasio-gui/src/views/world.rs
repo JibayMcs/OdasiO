@@ -123,7 +123,7 @@ fn world_card(ui: &mut Ui, card: &Card, width: f32) -> bool {
         ui.painter().rect_stroke(
             response.rect,
             theme::RADIUS,
-            egui::Stroke::new(1.5, p.accent),
+            egui::Stroke::new(1.5_f32, p.accent),
             egui::StrokeKind::Inside,
         );
     }
@@ -157,7 +157,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
     if let Some(error) = &app.world_error {
         egui::Frame::new()
             .fill(p.danger.gamma_multiply(0.15))
-            .stroke(egui::Stroke::new(1.0, p.danger))
+            .stroke(egui::Stroke::new(1.0_f32, p.danger))
             .corner_radius(theme::RADIUS)
             .inner_margin(12)
             .show(ui, |ui| {

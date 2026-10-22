@@ -571,7 +571,7 @@ impl VsAssets {
                 .1;
             by_type(by_pattern, "base", &code)
                 .and_then(Value::as_str)
-                .map(&substitute)
+                .map(substitute)
         };
         const IGNORED: [&str; 4] = ["specialsecondtexture", "particletop", "snowed", "inside"];
         let first = textures
@@ -614,7 +614,7 @@ impl VsAssets {
         let shape_base = shape
             .and_then(|s| by_type(s, "base", &code))
             .and_then(Value::as_str)
-            .map(&substitute)
+            .map(substitute)
             .unwrap_or_default()
             .to_lowercase();
 
@@ -652,7 +652,7 @@ impl VsAssets {
                     let shape_textures = get(shape_json.as_ref()?, "textures")?;
                     get(shape_textures, key)
                         .and_then(Value::as_str)
-                        .map(&substitute)
+                        .map(substitute)
                 })
         };
 

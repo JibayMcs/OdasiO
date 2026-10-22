@@ -98,9 +98,9 @@ fn visuals(p: Palette, dark: bool) -> egui::Visuals {
     v.override_text_color = Some(p.text);
     v.hyperlink_color = p.accent;
     v.selection.bg_fill = p.accent.gamma_multiply(0.35);
-    v.selection.stroke = Stroke::new(1.0, p.accent);
+    v.selection.stroke = Stroke::new(1.0_f32, p.accent);
     v.window_corner_radius = CornerRadius::same(RADIUS);
-    v.window_stroke = Stroke::new(1.0, p.border);
+    v.window_stroke = Stroke::new(1.0_f32, p.border);
     v.window_shadow = Shadow {
         offset: [0, 6],
         blur: 24,
@@ -121,14 +121,14 @@ fn visuals(p: Palette, dark: bool) -> egui::Visuals {
         w.bg_fill = fill;
         w.weak_bg_fill = fill;
     }
-    v.widgets.noninteractive.bg_stroke = Stroke::new(1.0, p.border);
-    v.widgets.noninteractive.fg_stroke = Stroke::new(1.0, p.text);
-    v.widgets.inactive.bg_stroke = Stroke::new(1.0, p.border);
-    v.widgets.inactive.fg_stroke = Stroke::new(1.0, p.text);
-    v.widgets.hovered.bg_stroke = Stroke::new(1.0, p.accent.gamma_multiply(0.7));
-    v.widgets.hovered.fg_stroke = Stroke::new(1.5, p.text);
-    v.widgets.active.bg_stroke = Stroke::new(1.0, p.accent);
-    v.widgets.active.fg_stroke = Stroke::new(1.5, p.text);
+    v.widgets.noninteractive.bg_stroke = Stroke::new(1.0_f32, p.border);
+    v.widgets.noninteractive.fg_stroke = Stroke::new(1.0_f32, p.text);
+    v.widgets.inactive.bg_stroke = Stroke::new(1.0_f32, p.border);
+    v.widgets.inactive.fg_stroke = Stroke::new(1.0_f32, p.text);
+    v.widgets.hovered.bg_stroke = Stroke::new(1.0_f32, p.accent.gamma_multiply(0.7));
+    v.widgets.hovered.fg_stroke = Stroke::new(1.5_f32, p.text);
+    v.widgets.active.bg_stroke = Stroke::new(1.0_f32, p.accent);
+    v.widgets.active.fg_stroke = Stroke::new(1.5_f32, p.text);
     v
 }
 
@@ -170,7 +170,7 @@ pub fn card(ui: &Ui) -> egui::Frame {
     let p = Palette::of(ui);
     egui::Frame::new()
         .fill(p.card)
-        .stroke(Stroke::new(1.0, p.border))
+        .stroke(Stroke::new(1.0_f32, p.border))
         .corner_radius(CornerRadius::same(RADIUS))
         .inner_margin(Margin::same(18))
 }
@@ -189,7 +189,7 @@ pub fn section(ui: &mut Ui, title: &str, subtitle: &str) {
 pub fn badge(ui: &mut Ui, text: &str, color: Color32) {
     egui::Frame::new()
         .fill(color.gamma_multiply(0.18))
-        .stroke(Stroke::new(1.0, color.gamma_multiply(0.6)))
+        .stroke(Stroke::new(1.0_f32, color.gamma_multiply(0.6)))
         .corner_radius(CornerRadius::same(255))
         .inner_margin(Margin::symmetric(9, 2))
         .show(ui, |ui| {

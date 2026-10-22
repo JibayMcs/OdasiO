@@ -528,7 +528,7 @@ fn frame(app: &mut OdasioApp, ui: &mut Ui, rects: [Rect; 2], input: &Input) {
         painter.rect_stroke(
             rect,
             theme::RADIUS,
-            Stroke::new(1.0, p.border),
+            Stroke::new(1.0_f32, p.border),
             egui::StrokeKind::Inside,
         );
         let title = if i == MC {
@@ -668,7 +668,7 @@ fn controls(ui: &mut Ui, side: usize, rect: Rect, yaw: f64, pitch: f64, input: &
         center,
         radius + 14.0,
         Color32::from_black_alpha(if compass.hovered() { 190 } else { 140 }),
-        Stroke::new(1.0, Color32::from_white_alpha(50)),
+        Stroke::new(1.0_f32, Color32::from_white_alpha(50)),
     );
     // Direction à l'écran d'un vecteur horizontal du monde (x, z).
     let (s, c) = (yaw.sin() as f32, yaw.cos() as f32);
@@ -747,7 +747,7 @@ fn controls(ui: &mut Ui, side: usize, rect: Rect, yaw: f64, pitch: f64, input: &
         if action == 5 {
             // Vue d'ensemble : coins d'un cadre (pas de glyphe fiable dans la police).
             let r = Rect::from_center_size(button.center(), vec2(14.0, 14.0));
-            let stroke = Stroke::new(1.6, Color32::WHITE);
+            let stroke = Stroke::new(1.6_f32, Color32::WHITE);
             for (corner, dx, dy) in [
                 (r.left_top(), 1.0, 1.0),
                 (r.right_top(), -1.0, 1.0),
@@ -794,7 +794,7 @@ fn info_bar(app: &mut OdasioApp, ui: &mut Ui, rect: Rect) {
     let mut deselect = false;
     let frame = egui::Frame::new()
         .fill(p.card)
-        .stroke(Stroke::new(1.0, p.border))
+        .stroke(Stroke::new(1.0_f32, p.border))
         .corner_radius(theme::RADIUS)
         .inner_margin(egui::Margin::symmetric(16, 0));
     ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
