@@ -63,8 +63,10 @@ pub struct Chunk {
     pub z: i32,
     pub data_version: i32,
     pub format: ChunkFormat,
-    /// Génération terminée (terrain, structures et décorations posés).
-    /// Les chunks partiels (bordure de zone explorée) sont à ignorer à la conversion.
+    /// Chunk utilisable : génération terminée, ou statut inachevé mais terrain présent.
+    /// Les outils d'édition (WorldPainter...) laissent souvent un statut ancien sur des
+    /// chunks bien remplis, et une bordure de zone explorée sans arbres vaut mieux qu'un
+    /// trou : seuls les chunks sans aucun bloc sont à ignorer.
     pub complete: bool,
     /// Sections triées par `y` croissant.
     pub sections: Vec<Section>,
@@ -91,6 +93,7 @@ impl Chunk {
             }
         }
         chunk.sections.sort_by_key(|s| s.y);
+        chunk.complete |= chunk.sections.iter().any(|s| !s.is_empty());
         Ok(chunk)
     }
 }
