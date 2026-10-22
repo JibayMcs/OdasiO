@@ -3,6 +3,7 @@ mod i18n;
 mod recent;
 mod task;
 mod theme;
+mod update;
 mod views;
 
 use eframe::egui;

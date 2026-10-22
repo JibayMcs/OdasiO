@@ -40,6 +40,7 @@ Before converting, you can fly over **both worlds side by side in 3D**, rendered
 - **Choose the world around your map**: Vintage Story terrain (sea levels aligned), endless ocean, or a flat plain. Pick the season (or lock it) and the game mode.
 - **Your files are safe**: the source world is only read, never modified.
 - **No downloads**: textures and models are read from your Minecraft and Vintage Story installations. Nothing from the games is bundled or redistributed.
+- **Updates itself**: new versions are offered in the app and installed in one click.
 - **English and French** interface, light and dark themes.
 - **Fast**: a 160,000-chunk world is analysed in about 2 seconds and converted in under a minute.
 

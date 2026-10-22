@@ -42,6 +42,16 @@ Compilez depuis les sources (ci-dessous). L'application est un seul exécutable,
 
 Téléchargez l'installateur (`.exe`) depuis la page [Releases](https://github.com/JibayMcs/OdasiO/releases) et lancez-le. OdasiO apparaît dans le menu Démarrer ; la ligne de commande `odasio` est installée à côté.
 
+## Mises à jour
+
+OdasiO cherche une nouvelle version au démarrage (au plus une fois par jour) et affiche un bandeau quand il en trouve une : **Mettre à jour** la télécharge, vérifie son empreinte SHA-256 avec la liste publiée avec la version, et l'installe comme OdasiO a été installé :
+
+- **installateur Windows** : le nouvel installateur s'exécute en silence, puis relance OdasiO ;
+- **paquet `.deb`** : installé avec votre mot de passe (`pkexec`) ; à défaut, le paquet s'ouvre dans votre gestionnaire de logiciels ;
+- **archive portable** : l'exécutable est remplacé sur place.
+
+Cliquez sur le numéro de version (en haut à droite) pour vérifier tout de suite. La variable d'environnement `ODASIO_NO_UPDATE` désactive la vérification automatique. Les versions compilées en mode debug ne vérifient pas.
+
 ## Compiler depuis les sources
 
 1. Installez Rust 1.85 ou plus récent avec [rustup](https://rustup.rs).

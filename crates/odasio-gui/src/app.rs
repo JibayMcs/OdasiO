@@ -9,6 +9,7 @@ use crate::i18n::{self, Lang, tr, trf};
 use crate::recent::Recent;
 use crate::task::Task;
 use crate::theme::{self, Palette};
+use crate::update;
 use crate::views;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -89,6 +90,7 @@ pub struct OdasioApp {
     pub mapping_rev: u64,
     pub mapping_view: views::mapping::ViewState,
     pub preview: views::preview::ViewState,
+    pub updater: update::Updater,
     /// Accès au GPU (wgpu, partagé avec egui) pour l'aperçu 3D.
     pub render_state: Option<eframe::egui_wgpu::RenderState>,
     window_fitted: bool,
@@ -115,6 +117,11 @@ impl OdasioApp {
             mapping_rev: 0,
             mapping_view: Default::default(),
             preview: Default::default(),
+            updater: {
+                let mut updater = update::Updater::default();
+                updater.start_auto(&cc.egui_ctx);
+                updater
+            },
             render_state: cc.wgpu_render_state.clone(),
             window_fitted: false,
             form: ConvertForm {
@@ -269,6 +276,8 @@ impl OdasioApp {
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 egui::widgets::global_theme_preference_switch(ui);
                 language_switch(ui);
+                ui.add_space(6.0);
+                self.updater.version_button(ui);
             });
         });
         ui.add_space(10.0);
@@ -347,6 +356,7 @@ impl eframe::App for OdasioApp {
                     .inner_margin(egui::Margin::symmetric(24, 14)),
             )
             .show(ctx, |ui| self.header(ui));
+        self.updater.banner(ctx);
 
         egui::TopBottomPanel::bottom("footer")
             .frame(

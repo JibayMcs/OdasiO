@@ -42,6 +42,16 @@ Build from source (below). The app is a single binary with no runtime dependenci
 
 Download the installer (`.exe`) from the [Releases](https://github.com/JibayMcs/OdasiO/releases) page and run it. OdasiO appears in the Start menu. The `odasio` command line is installed next to it.
 
+## Updates
+
+OdasiO checks for a new version at startup (at most once a day) and shows a banner when one is available: **Update** downloads it, checks its SHA-256 fingerprint against the list published with the release, and installs it the way OdasiO was installed:
+
+- **Windows installer**: the new installer runs silently, then restarts OdasiO;
+- **`.deb` package**: installed with your password (`pkexec`); without it, the package opens in your software manager;
+- **portable archive**: the executable is replaced in place.
+
+Click the version number (top right) to check right away. Set the `ODASIO_NO_UPDATE` environment variable to disable the automatic check. Versions built from source don't check in debug mode.
+
 ## Build from source
 
 1. Install Rust 1.85 or newer with [rustup](https://rustup.rs).

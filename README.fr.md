@@ -40,6 +40,7 @@ Avant de convertir, vous pouvez survoler **les deux mondes côte à côte en 3D*
 - **Le monde autour de votre carte** : terrain de Vintage Story (niveaux de la mer alignés), océan à perte de vue, ou plaine plate. Choisissez la saison (ou bloquez-la) et le mode de jeu.
 - **Vos fichiers ne risquent rien** : le monde d'origine est seulement lu, jamais modifié.
 - **Aucun téléchargement** : textures et modèles sont lus dans vos installations de Minecraft et de Vintage Story. Rien des jeux n'est inclus ni redistribué.
+- **Mises à jour intégrées** : les nouvelles versions sont proposées dans l'application et s'installent en un clic.
 - **Interface en français et en anglais**, thèmes clair et sombre.
 - **Rapide** : un monde de 160 000 chunks est analysé en 2 secondes environ et converti en moins d'une minute.
 
