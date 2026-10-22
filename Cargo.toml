@@ -1,0 +1,42 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/odasio-mc",
+    "crates/odasio-vs",
+    "crates/odasio-core",
+    "crates/odasio-gui",
+    "crates/odasio-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+authors = ["JibayMcs"]
+
+[workspace.dependencies]
+# Crates internes
+odasio-mc = { path = "crates/odasio-mc" }
+odasio-vs = { path = "crates/odasio-vs" }
+odasio-core = { path = "crates/odasio-core" }
+
+# Externes
+thiserror = "2"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
+
+[workspace.lints.rust]
+unsafe_code = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
