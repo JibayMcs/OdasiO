@@ -1944,23 +1944,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:black_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:black_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:black_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:black_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:black_terracotta"
 vs = "game:tile-2x2-plain-black"
@@ -1978,11 +1980,12 @@ category = "sign"
 # ---- minecraft:black_wool
 [[block]]
 mc = "minecraft:black_wool"
-vs = "game:wool-black-up"
+vs = "game:planks-ebony-ud"
 quality = "exact"
 category = "colored"
 
 # ---- minecraft:blackstone
+note = "la laine VS est un revêtement d'un voxel : bloc plein de couleur proche à la place"
 [[block]]
 mc = "minecraft:blackstone"
 vs = "game:rock-basalt"
@@ -2377,23 +2380,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:blue_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:blue_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:blue_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:blue_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:blue_terracotta"
 vs = "game:tile-2x2-plain-blue"
@@ -2817,31 +2822,33 @@ category = "colored"
 [[block]]
 mc = "minecraft:brown_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:brown_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:brown_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:brown_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:brown_terracotta"
-vs = "game:tile-2x2-plain-brown"
+vs = "game:hardenedclay-brown"
 quality = "equivalent"
-category = "colored"
-note = "fired clay tile block"
+category = "terrain"
 
 # ---- minecraft:brown_wall_banner
+note = "strate brune des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:brown_wall_banner"
 vs = "game:banner-banner"
@@ -2851,11 +2858,12 @@ category = "sign"
 # ---- minecraft:brown_wool
 [[block]]
 mc = "minecraft:brown_wool"
-vs = "game:wool-brown-up"
+vs = "game:daub-brown-normal"
 quality = "exact"
 category = "colored"
 
 # ---- minecraft:bubble_column
+note = "la laine VS est un revêtement d'un voxel : bloc plein de couleur proche à la place"
 [[block]]
 mc = "minecraft:bubble_column"
 vs = "game:water-still-7"
@@ -4966,23 +4974,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:cyan_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:cyan_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:cyan_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:cyan_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:cyan_terracotta"
 vs = "game:tile-2x2-plain-blue"
@@ -7095,23 +7105,25 @@ category = "building"
 [[block]]
 mc = "minecraft:glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "building"
-note = "VS panes are leaded (wood framed), ns/we only"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "building"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "building"
 
 # ---- minecraft:glow_item_frame
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:glow_item_frame"
 vs = "game:air"
@@ -7487,23 +7499,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:gray_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:gray_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:gray_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:gray_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:gray_terracotta"
 vs = "game:tile-2x2-plain-gray"
@@ -7521,11 +7535,12 @@ category = "sign"
 # ---- minecraft:gray_wool
 [[block]]
 mc = "minecraft:gray_wool"
-vs = "game:wool-black-up"
+vs = "game:daub-ash-normal"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:green_banner
+note = "la laine VS est un revêtement d'un voxel : bloc plein de couleur proche à la place"
 [[block]]
 mc = "minecraft:green_banner"
 vs = "game:banner-banner"
@@ -7657,23 +7672,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:green_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:green_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:green_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:green_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:green_terracotta"
 vs = "game:tile-2x2-plain-gray"
@@ -8916,23 +8933,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:light_blue_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:light_blue_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:light_blue_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:light_blue_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:light_blue_terracotta"
 vs = "game:tile-2x2-plain-blue"
@@ -9088,31 +9107,33 @@ category = "colored"
 [[block]]
 mc = "minecraft:light_gray_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:light_gray_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:light_gray_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:light_gray_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:light_gray_terracotta"
-vs = "game:tile-2x2-plain-gray"
+vs = "game:hardenedclay-blue"
 quality = "equivalent"
-category = "colored"
-note = "fired clay tile block"
+category = "terrain"
 
 # ---- minecraft:light_gray_wall_banner
+note = "strate grise des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:light_gray_wall_banner"
 vs = "game:banner-banner"
@@ -9122,11 +9143,12 @@ category = "sign"
 # ---- minecraft:light_gray_wool
 [[block]]
 mc = "minecraft:light_gray_wool"
-vs = "game:wool-white-up"
+vs = "game:daub-ash-normal"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:light_weighted_pressure_plate
+note = "la laine VS est un revêtement d'un voxel : bloc plein de couleur proche à la place"
 [[block]]
 mc = "minecraft:light_weighted_pressure_plate"
 vs = "game:air"
@@ -9303,23 +9325,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:lime_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:lime_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:lime_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:lime_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:lime_terracotta"
 vs = "game:tile-2x2-plain-tan"
@@ -9490,23 +9514,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:magenta_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:magenta_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:magenta_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:magenta_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:magenta_terracotta"
 vs = "game:tile-2x2-plain-red"
@@ -11399,31 +11425,33 @@ category = "colored"
 [[block]]
 mc = "minecraft:orange_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:orange_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:orange_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:orange_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:orange_terracotta"
-vs = "game:tile-2x2-plain-orange"
+vs = "game:hardenedclay-fire"
 quality = "equivalent"
-category = "colored"
-note = "fired clay tile block"
+category = "terrain"
 
 # ---- minecraft:orange_tulip
+note = "strate orange des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:orange_tulip"
 vs = "game:flower-orangemallow-free"
@@ -12258,23 +12286,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:pink_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:pink_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:pink_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:pink_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:pink_terracotta"
 vs = "game:tile-2x2-plain-red"
@@ -14224,23 +14254,25 @@ category = "colored"
 [[block]]
 mc = "minecraft:purple_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:purple_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:purple_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:purple_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:purple_terracotta"
 vs = "game:tile-2x2-plain-blue"
@@ -15016,31 +15048,33 @@ category = "colored"
 [[block]]
 mc = "minecraft:red_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:red_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:red_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:red_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:red_terracotta"
-vs = "game:tile-2x2-plain-red"
+vs = "game:hardenedclay-red"
 quality = "equivalent"
-category = "colored"
-note = "fired clay tile block"
+category = "terrain"
 
 # ---- minecraft:red_tulip
+note = "strate rouge des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:red_tulip"
 vs = "game:flower-lupine-red-free"
@@ -17563,6 +17597,7 @@ quality = "equivalent"
 category = "terrain"
 
 # ---- minecraft:test_block
+note = "argile durcie naturelle (badlands) : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:test_block"
 vs = "game:air"
@@ -19581,31 +19616,33 @@ category = "colored"
 [[block]]
 mc = "minecraft:white_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:white_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:white_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:white_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:white_terracotta"
-vs = "game:tile-2x2-plain-cream"
+vs = "game:rock-chalk"
 quality = "equivalent"
-category = "colored"
-note = "fired clay tile block"
+category = "terrain"
 
 # ---- minecraft:white_tulip
+note = "strate claire des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:white_tulip"
 vs = "game:flower-lupine-white-free"
@@ -19622,11 +19659,12 @@ category = "sign"
 # ---- minecraft:white_wool
 [[block]]
 mc = "minecraft:white_wool"
-vs = "game:wool-white-up"
+vs = "game:plaster-plain"
 quality = "exact"
 category = "colored"
 
 # ---- minecraft:wildflowers
+note = "la laine VS est un revêtement d'un voxel : bloc plein de couleur proche à la place"
 [[block]]
 mc = "minecraft:wildflowers"
 vs = "game:flower-wilddaisy-free"
@@ -19787,31 +19825,33 @@ category = "colored"
 [[block]]
 mc = "minecraft:yellow_stained_glass_pane"
 when = { east = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
-note = "colour lost"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:yellow_stained_glass_pane"
 when = { west = "true" }
-vs = "game:glasspane-leaded-oak-ew"
+vs = "game:glasspane-leaded-oak-ns"
 quality = "equivalent"
 category = "colored"
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:yellow_stained_glass_pane"
-vs = "game:glasspane-leaded-oak-ns"
+vs = "game:glasspane-leaded-oak-ew"
 quality = "equivalent"
 category = "colored"
 
 # ---- minecraft:yellow_terracotta
+note = "VS : glasspane-ns s'étend d'est en ouest (face nord/sud), -ew du nord au sud"
 [[block]]
 mc = "minecraft:yellow_terracotta"
-vs = "game:tile-2x2-plain-tan"
+vs = "game:rock-sandstone"
 quality = "equivalent"
-category = "colored"
-note = "fired clay tile block"
+category = "terrain"
 
 # ---- minecraft:yellow_wall_banner
+note = "strate jaune des badlands : la terracotta naturelle devient un bloc naturel VS ; carrelage via surcharge pour les constructions"
 [[block]]
 mc = "minecraft:yellow_wall_banner"
 vs = "game:banner-banner"

@@ -603,6 +603,34 @@ mod tests {
     }
 
     #[test]
+    fn panes_follow_their_connections() {
+        // VS : glasspane-ns s'étend d'est en ouest, comme une vitre MC reliée à l'est.
+        let mapping = Mapping::builtin();
+        let along_x = mapping.resolve(&state(
+            "minecraft:glass_pane[east=true,north=false,south=false,waterlogged=false,west=true]",
+        ));
+        assert!(along_x.block.ends_with("-ns"), "{}", along_x.block);
+        let along_z = mapping.resolve(&state(
+            "minecraft:glass_pane[east=false,north=true,south=true,waterlogged=false,west=false]",
+        ));
+        assert!(along_z.block.ends_with("-ew"), "{}", along_z.block);
+    }
+
+    #[test]
+    fn full_wool_blocks_stay_full_blocks() {
+        // `game:wool-*` est un revêtement d'un voxel, pas un bloc plein.
+        let mapping = Mapping::builtin();
+        for color in ["white", "gray", "light_gray", "brown", "black", "red"] {
+            let wool = mapping.resolve(&state(&format!("minecraft:{color}_wool")));
+            assert!(
+                !wool.block.starts_with("game:wool-"),
+                "{color} -> {}",
+                wool.block
+            );
+        }
+    }
+
+    #[test]
     fn rock_placeholder_follows_settings() {
         let mut mapping = Mapping::builtin();
         mapping.set_rock("basalt").unwrap();

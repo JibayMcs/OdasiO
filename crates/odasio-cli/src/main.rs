@@ -4,7 +4,7 @@ use std::time::Instant;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use odasio_core::mc::World;
-use odasio_core::{ConversionPlan, Inventory, Mapping, Quality};
+use odasio_core::{ConversionPlan, ConvertOptions, Inventory, Mapping, Progress, Quality};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
@@ -56,6 +56,52 @@ enum Command {
         #[arg(long, default_value_t = 8)]
         top: usize,
     },
+    /// Inspecte une colonne d'une sauvegarde Vintage Story
+    Inspect {
+        /// Fichier .vcdbs
+        save: PathBuf,
+        /// Position X d'un bloc de la colonne
+        x: u32,
+        /// Position Z d'un bloc de la colonne
+        z: u32,
+    },
+    /// Convertit une dimension Minecraft en monde Vintage Story
+    Convert {
+        /// Dossier du monde Minecraft (contient level.dat)
+        world: PathBuf,
+        /// Nom du monde VS (et du fichier dans le dossier des sauvegardes)
+        #[arg(long, default_value = "Odasio")]
+        name: String,
+        /// Fichier .vcdbs de sortie (par défaut : dossier des sauvegardes de Vintage Story)
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// Écrase la sauvegarde si elle existe
+        #[arg(long)]
+        force: bool,
+        /// Monde modèle à utiliser au lieu d'en générer un avec le serveur VS
+        #[arg(long)]
+        template: Option<PathBuf>,
+        /// Dimension à convertir
+        #[arg(long, default_value = "minecraft:overworld")]
+        dimension: String,
+        /// Roche VS utilisée pour la pierre Minecraft
+        #[arg(long)]
+        rock: Option<String>,
+        /// Hauteur du monde VS (multiple de 32)
+        #[arg(long, default_value_t = 384)]
+        height: u32,
+        /// Décalage vertical ajouté au Y Minecraft
+        #[arg(long, default_value_t = 64)]
+        y_offset: i32,
+    },
+}
+
+/// Dossier des sauvegardes du jeu.
+fn vs_saves_dir() -> Option<PathBuf> {
+    if let Some(appdata) = std::env::var_os("APPDATA") {
+        return Some(PathBuf::from(appdata).join("VintagestoryData/Saves"));
+    }
+    std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".config/VintagestoryData/Saves"))
 }
 
 fn main() -> Result<()> {
@@ -74,6 +120,33 @@ fn main() -> Result<()> {
         }
         Command::Scan { world, top, out } => scan(&world, top, out.as_deref())?,
         Command::Plan { world, rock, top } => plan(&world, rock.as_deref(), top)?,
+        Command::Inspect { save, x, z } => inspect(&save, x / 32, z / 32)?,
+        Command::Convert {
+            world,
+            name,
+            out,
+            force,
+            template,
+            dimension,
+            rock,
+            height,
+            y_offset,
+        } => {
+            let output = match out {
+                Some(out) => out,
+                None => vs_saves_dir()
+                    .context("dossier des sauvegardes VS introuvable, utilisez --out")?
+                    .join(format!("{name}.vcdbs")),
+            };
+            let mut opts = ConvertOptions::new(output);
+            opts.world_name = name;
+            opts.overwrite = force;
+            opts.template = template;
+            opts.dimension = dimension;
+            opts.map_size_y = height;
+            opts.y_offset = y_offset;
+            convert(&world, rock.as_deref(), &opts)?;
+        }
     }
     Ok(())
 }
@@ -207,6 +280,119 @@ fn plan(args: &WorldArgs, rock: Option<&str>, top: usize) -> Result<()> {
                 entry.count, entry.state, entry.resolved
             );
         }
+    }
+    Ok(())
+}
+
+fn convert(path: &Path, rock: Option<&str>, opts: &ConvertOptions) -> Result<()> {
+    let world = World::open(path)?;
+    let mut mapping = Mapping::builtin();
+    if let Some(rock) = rock {
+        mapping.set_rock(rock)?;
+    }
+    println!(
+        "Conversion de « {} » vers {}",
+        world.level.name,
+        opts.output.display()
+    );
+    let report = odasio_core::convert(&world, &mapping, opts, |p| match p {
+        Progress::GeneratingTemplate => {
+            println!("Génération du monde modèle par le serveur Vintage Story...")
+        }
+        Progress::Converting { done, total } => {
+            if done == total || done % 10 == 0 {
+                println!("  régions : {done}/{total}");
+            }
+        }
+        Progress::Finishing => println!("Finalisation..."),
+    })?;
+
+    println!(
+        "\nTerminé en {:.1?} : {} régions, {} chunks MC, {} colonnes VS, {} chunks ignorés, {} blocs hors hauteur",
+        report.elapsed,
+        report.regions,
+        report.mc_chunks,
+        report.columns,
+        report.skipped_chunks,
+        report.clipped_blocks
+    );
+    println!(
+        "Spawn : {} {} {}",
+        report.spawn[0], report.spawn[1], report.spawn[2]
+    );
+    for (code, n) in &report.missing_codes {
+        println!("  code absent du jeu, remplacé par de l'air : {code} ({n} états)");
+    }
+    Ok(())
+}
+
+fn inspect(save: &Path, cx: u32, cz: u32) -> Result<()> {
+    use odasio_core::vs::{VsDatabase, layer, proto::ProtoReader};
+
+    let db = VsDatabase::open(save)?;
+    let ids = db.save.block_ids()?;
+    let names: std::collections::HashMap<u32, &str> =
+        ids.iter().map(|(code, id)| (*id, code.as_str())).collect();
+    println!(
+        "{} : monde « {} » ({}), {} x {} x {}",
+        save.display(),
+        db.save.world_name,
+        db.save.world_type,
+        db.save.map_size[0],
+        db.save.map_size[1],
+        db.save.map_size[2]
+    );
+
+    let map = db
+        .read_map_chunk(cx, cz)?
+        .with_context(|| format!("pas de map chunk en {cx},{cz}"))?;
+    let mut pass = None;
+    let mut y_max = None;
+    for field in ProtoReader::new(&map) {
+        let field = field?;
+        match field.number {
+            4 => pass = field.value.as_u64(),
+            10 => y_max = field.value.as_u64(),
+            _ => {}
+        }
+    }
+    println!("Colonne {cx},{cz} : passe {pass:?} (6 = terminée), YMax {y_max:?}");
+
+    for cy in 0..db.save.map_size[1] / 32 {
+        let Some(blob) = db.read_chunk(cx, cy, cz)? else {
+            println!("  cy {cy:>2} : absent");
+            continue;
+        };
+        let mut blocks = Vec::new();
+        let mut light = 0usize;
+        for field in ProtoReader::new(&blob) {
+            let field = field?;
+            match field.number {
+                1 => blocks = layer::decode(field.value.as_bytes().unwrap_or_default())?,
+                2 => light = field.value.as_bytes().map_or(0, <[u8]>::len),
+                _ => {}
+            }
+        }
+        let mut counts: std::collections::HashMap<u32, usize> = std::collections::HashMap::new();
+        for id in blocks.iter().filter(|&&id| id != 0) {
+            *counts.entry(*id).or_default() += 1;
+        }
+        let mut top: Vec<_> = counts.into_iter().collect();
+        top.sort_by_key(|(_, n)| std::cmp::Reverse(*n));
+        let summary: Vec<String> = top
+            .iter()
+            .take(4)
+            .map(|(id, n)| format!("{} x{n}", names.get(id).unwrap_or(&"?")))
+            .collect();
+        println!(
+            "  cy {cy:>2} : lumière {:>5} octets, {}",
+            light,
+            if summary.is_empty() {
+                "air".to_string()
+            } else {
+                summary.join(", ")
+            }
+        );
     }
     Ok(())
 }
