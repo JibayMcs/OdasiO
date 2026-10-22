@@ -1,3 +1,9 @@
+mod app;
+mod recent;
+mod task;
+mod theme;
+mod views;
+
 use eframe::egui;
 use tracing_subscriber::EnvFilter;
 
@@ -9,28 +15,14 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title(odasio_core::APP_NAME)
-            .with_inner_size([1100.0, 720.0]),
+            .with_app_id("odasio")
+            .with_inner_size([1180.0, 800.0])
+            .with_min_inner_size([560.0, 480.0]),
         ..Default::default()
     };
     eframe::run_native(
         odasio_core::APP_NAME,
         options,
-        Box::new(|_cc| Ok(Box::new(OdasioApp))),
+        Box::new(|cc| Ok(Box::new(app::OdasioApp::new(cc)))),
     )
-}
-
-#[derive(Default)]
-struct OdasioApp;
-
-impl eframe::App for OdasioApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading(format!(
-                "{} {}",
-                odasio_core::APP_NAME,
-                odasio_core::VERSION
-            ));
-            ui.label("Convertisseur de mondes Minecraft Java vers Vintage Story.");
-        });
-    }
 }

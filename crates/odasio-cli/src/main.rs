@@ -96,14 +96,6 @@ enum Command {
     },
 }
 
-/// Dossier des sauvegardes du jeu.
-fn vs_saves_dir() -> Option<PathBuf> {
-    if let Some(appdata) = std::env::var_os("APPDATA") {
-        return Some(PathBuf::from(appdata).join("VintagestoryData/Saves"));
-    }
-    std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".config/VintagestoryData/Saves"))
-}
-
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
@@ -134,7 +126,7 @@ fn main() -> Result<()> {
         } => {
             let output = match out {
                 Some(out) => out,
-                None => vs_saves_dir()
+                None => odasio_core::paths::vs_saves_dir()
                     .context("dossier des sauvegardes VS introuvable, utilisez --out")?
                     .join(format!("{name}.vcdbs")),
             };

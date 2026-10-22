@@ -4,6 +4,7 @@ pub mod catalog;
 pub mod convert;
 pub mod inventory;
 pub mod mapping;
+pub mod paths;
 pub mod plan;
 
 pub use convert::{ConvertOptions, ConvertReport, Progress, convert};
