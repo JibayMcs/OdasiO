@@ -39,6 +39,13 @@ impl Step {
     }
 }
 
+/// Sens de la conversion.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Direction {
+    ToVintageStory,
+    ToMinecraft,
+}
+
 pub struct LoadedWorld {
     pub path: PathBuf,
     pub world: World,
@@ -63,6 +70,8 @@ pub struct ConvertForm {
 
 pub struct OdasioApp {
     pub step: Step,
+    pub direction: Direction,
+    pub reverse: views::reverse::ReverseState,
     pub recent: Recent,
     pub world_cards: Option<Vec<views::world::Card>>,
     pub world: Option<LoadedWorld>,
@@ -82,6 +91,8 @@ impl OdasioApp {
         theme::install(&cc.egui_ctx);
         Self {
             step: Step::World,
+            direction: Direction::ToVintageStory,
+            reverse: Default::default(),
             recent: Recent::load(),
             world_cards: None,
             world: None,
@@ -130,7 +141,7 @@ impl OdasioApp {
                     .or(world.dimensions.first())
                     .map(|d| d.id.clone())
                     .unwrap_or_default();
-                self.form.world_name = format!("{} (Odasio)", world.level.name);
+                self.form.world_name = theme::converted_name(&world.level.name);
                 self.form.output_custom = false;
                 self.world_error = None;
                 self.world = Some(LoadedWorld {
@@ -179,6 +190,13 @@ impl OdasioApp {
     }
 
     fn step_available(&self, step: Step) -> bool {
+        if self.direction == Direction::ToMinecraft {
+            return match step {
+                Step::World => true,
+                Step::Analysis => self.reverse.save.is_some(),
+                _ => self.reverse.inventory().is_some(),
+            };
+        }
         match step {
             Step::World => true,
             Step::Analysis => self.world.is_some(),
@@ -197,7 +215,11 @@ impl OdasioApp {
                 .fit_to_exact_size(egui::vec2(30.0, 30.0)),
             );
             ui.label(RichText::new("OdasiO").size(22.0).strong().color(p.accent));
-            ui.label(RichText::new("Minecraft vers Vintage Story").color(p.muted));
+            let subtitle = match self.direction {
+                Direction::ToVintageStory => "Minecraft vers Vintage Story",
+                Direction::ToMinecraft => "Vintage Story vers Minecraft",
+            };
+            ui.label(RichText::new(subtitle).color(p.muted));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 egui::widgets::global_theme_preference_switch(ui);
             });
@@ -303,6 +325,19 @@ impl eframe::App for OdasioApp {
                             ui.add_space(margin);
                             ui.vertical(|ui| {
                                 ui.set_width(width);
+                                if self.step == Step::World {
+                                    direction_switch(self, ui);
+                                }
+                                if self.direction == Direction::ToMinecraft {
+                                    match self.step {
+                                        Step::World => views::reverse::show_world(self, ui),
+                                        Step::Analysis => views::reverse::show_analysis(self, ui),
+                                        Step::Mapping => views::reverse::show_mapping(self, ui),
+                                        Step::Options => views::reverse::show_options(self, ui),
+                                        Step::Convert => views::reverse::show_convert(self, ui),
+                                    }
+                                    return;
+                                }
                                 match self.step {
                                     Step::World => views::world::show(self, ui),
                                     Step::Analysis => views::analysis::show(self, ui),
@@ -316,4 +351,30 @@ impl eframe::App for OdasioApp {
                     });
             });
     }
+}
+
+/// Choix du sens de conversion, en tête de la première étape.
+fn direction_switch(app: &mut OdasioApp, ui: &mut Ui) {
+    let p = Palette::of(ui);
+    ui.horizontal(|ui| {
+        for (direction, label) in [
+            (Direction::ToVintageStory, "Minecraft  ›  Vintage Story"),
+            (Direction::ToMinecraft, "Vintage Story  ›  Minecraft"),
+        ] {
+            let selected = app.direction == direction;
+            let text = RichText::new(label).size(15.5);
+            let button = egui::Button::new(if selected {
+                text.strong().color(p.accent_text)
+            } else {
+                text
+            })
+            .fill(if selected { p.accent } else { p.card })
+            .min_size(egui::vec2(240.0, 38.0));
+            if ui.add(button).clicked() && !selected {
+                app.direction = direction;
+                app.step = Step::World;
+            }
+        }
+    });
+    ui.add_space(theme::GAP + 4.0);
 }

@@ -10,6 +10,7 @@ pub mod paths;
 pub mod plan;
 pub mod reverse;
 pub mod to_minecraft;
+pub mod vs_inventory;
 
 pub use convert::{
     ConvertOptions, ConvertReport, GameMode, Lighting, Progress, Season, WorldType, convert,

@@ -251,3 +251,41 @@ pub fn percent(part: u64, total: u64) -> String {
         v => format!("{v:.1} %").replace('.', ","),
     }
 }
+
+/// Nom proposé pour le monde converti : le suffixe « (OdasiO) » n'est jamais doublé.
+pub fn converted_name(name: &str) -> String {
+    const SUFFIX: &str = "(odasio)";
+    let base = name.trim();
+    let cut = base.len().saturating_sub(SUFFIX.len());
+    let base = if base.is_char_boundary(cut) && base[cut..].eq_ignore_ascii_case(SUFFIX) {
+        base[..cut].trim_end()
+    } else {
+        base
+    };
+    format!("{base} (OdasiO)")
+}
+
+/// « 1 type », « 3 types ».
+pub fn plural(n: usize, singular: &str, plural: &str) -> String {
+    format!(
+        "{} {}",
+        thousands(n as u64),
+        if n > 1 { plural } else { singular }
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn converted_names_never_double_the_suffix() {
+        assert_eq!(converted_name("Riveciel"), "Riveciel (OdasiO)");
+        assert_eq!(
+            converted_name("Riveciel v3.7 océan (Odasio)"),
+            "Riveciel v3.7 océan (OdasiO)"
+        );
+        assert_eq!(converted_name("Écrin (OdasiO) "), "Écrin (OdasiO)");
+        assert_eq!(converted_name("é"), "é (OdasiO)");
+    }
+}
