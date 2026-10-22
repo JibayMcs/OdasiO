@@ -1,0 +1,23 @@
+[package]
+name = "odasio-render"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+image = { version = "0.25.9", default-features = false, features = ["png"] }
+json5 = "1.3.3"
+odasio-mc.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
+thiserror.workspace = true
+tracing.workspace = true
+zip = "7.3.0"
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+odasio-core.workspace = true

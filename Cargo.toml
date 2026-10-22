@@ -4,6 +4,7 @@ members = [
     "crates/odasio-mc",
     "crates/odasio-vs",
     "crates/odasio-core",
+    "crates/odasio-render",
     "crates/odasio-gui",
     "crates/odasio-cli",
 ]
@@ -20,6 +21,7 @@ authors = ["JibayMcs"]
 odasio-mc = { path = "crates/odasio-mc" }
 odasio-vs = { path = "crates/odasio-vs" }
 odasio-core = { path = "crates/odasio-core" }
+odasio-render = { path = "crates/odasio-render" }
 
 # Externes
 thiserror = "2"
