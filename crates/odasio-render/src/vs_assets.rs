@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 
 use serde_json::{Map, Value};
 
-use crate::look::{BlockLook, Face, Shape, Texture};
+use crate::look::{BlockLook, Element, ElementFace, Face, Shape, Texture};
 use crate::mc_assets::{FACES, NORMALS, face_index, rotate, rotate_bounds};
 
 const DOMAINS: [&str; 3] = ["game", "survival", "creative"];
@@ -360,6 +360,7 @@ impl VsAssets {
         let mut min = [16.0f32; 3];
         let mut max = [0.0f32; 3];
         let mut faces: [Option<(f32, String)>; 6] = Default::default();
+        let mut elements: Vec<Element> = Vec::new();
         let mut stack: Vec<(&Value, [f32; 3])> = get(shape, "elements")?
             .as_array()?
             .iter()
@@ -381,6 +382,48 @@ impl VsAssets {
             let Some(Value::Object(element_faces)) = get(element, "faces") else {
                 continue;
             };
+            // Élément détaillé : faces dans l'ordre dessus, dessous, sud, nord, est, ouest,
+            // UV en unités de texture de la forme.
+            let names = ["up", "down", "south", "north", "east", "west"];
+            let detailed: [Option<ElementFace>; 6] = std::array::from_fn(|d| {
+                let f = element_faces
+                    .iter()
+                    .find(|(k, _)| k.eq_ignore_ascii_case(names[d]))
+                    .map(|(_, v)| v)?;
+                if f.get("enabled") == Some(&Value::Bool(false)) {
+                    return None;
+                }
+                let key = f.get("texture").and_then(Value::as_str)?;
+                if key == "#null" {
+                    return None;
+                }
+                let resolved = face(key)?;
+                let (w, h) = texture_size(shape, key.trim_start_matches('#'));
+                let uv = f
+                    .get("uv")
+                    .and_then(Value::as_array)
+                    .map(|a| {
+                        let v = |i: usize| a.get(i).and_then(Value::as_f64).unwrap_or(0.0) as f32;
+                        [v(0) / w, v(1) / h, v(2) / w, v(3) / h]
+                    })
+                    .unwrap_or([0.0, 0.0, 1.0, 1.0]);
+                Some(ElementFace {
+                    texture: resolved.texture,
+                    uv,
+                    tint: resolved.tint,
+                    cull: false,
+                })
+            });
+            if detailed.iter().any(Option::is_some) {
+                let mut element = Element {
+                    from: from.map(|x| x / 16.0),
+                    to: to.map(|x| x / 16.0),
+                    faces: detailed,
+                }
+                .rotated(rx, ry);
+                element.mark_cull();
+                elements.push(element);
+            }
             let mut visible = false;
             for (f, name) in FACES.iter().enumerate() {
                 let Some(element_face) = element_faces
@@ -436,7 +479,7 @@ impl VsAssets {
         };
         let (top, south, east) = (pick([0, 1, 0])?, pick([0, 0, 1])?, pick([1, 0, 0])?);
         let (lo, hi) = rotate_bounds(min, max, rx, ry);
-        Some(BlockLook::cuboid(lo, hi, top, south, east))
+        Some(BlockLook::cuboid(lo, hi, top, south, east).with_elements(elements))
     }
 
     pub fn look(&self, full_code: &str) -> Option<BlockLook> {
@@ -673,6 +716,21 @@ impl VsAssets {
         }
         Some(BlockLook::cuboid(min, max, top, south, east))
     }
+}
+
+/// Taille (largeur, hauteur) de référence des UV d'une texture de la forme.
+fn texture_size(shape: &Value, key: &str) -> (f32, f32) {
+    let size = |v: Option<&Value>| v.and_then(Value::as_f64).map(|x| x as f32);
+    if let Some(Value::Array(s)) = get(shape, "textureSizes").and_then(|t| get(t, key)) {
+        let (w, h) = (size(s.first()), size(s.get(1)));
+        if let (Some(w), Some(h)) = (w, h) {
+            return (w, h);
+        }
+    }
+    (
+        size(get(shape, "textureWidth")).unwrap_or(16.0),
+        size(get(shape, "textureHeight")).unwrap_or(16.0),
+    )
 }
 
 /// Première texture référencée par une face d'élément.

@@ -10,4 +10,4 @@ pub mod topmap;
 pub mod voxel;
 pub mod vs_assets;
 
-pub use look::{BlockLook, Face, Shape, Texture};
+pub use look::{BlockLook, Element, ElementFace, Face, Shape, Texture};

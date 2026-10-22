@@ -247,6 +247,41 @@ pub fn mesh_chunk(
                 let neighbor =
                     |d: usize| at(x + DIRS[d][0], y + DIRS[d][1], z + DIRS[d][2]).flatten();
                 let (fx, fy, fz) = (ox + x as f32, (chunk.min_y + y) as f32, oz + z as f32);
+                if !block.elements.is_empty() && !matches!(block.shape, Shape::Liquid) {
+                    for element in &block.elements {
+                        let (min, max) = (element.from, element.to);
+                        for (d, face) in element.faces.iter().enumerate() {
+                            let Some(face) = face else {
+                                continue;
+                            };
+                            if face.cull && hidden(d) {
+                                continue;
+                            }
+                            let r = uvs.rect(&face.texture);
+                            let (x0, y0, z0) = (fx + min[0], fy + min[1], fz + min[2]);
+                            let (x1, y1, z1) = (fx + max[0], fy + max[1], fz + max[2]);
+                            let corners = match d {
+                                0 => [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]],
+                                1 => [[x0, y0, z1], [x1, y0, z1], [x1, y0, z0], [x0, y0, z0]],
+                                2 => [[x0, y1, z1], [x1, y1, z1], [x1, y0, z1], [x0, y0, z1]],
+                                3 => [[x1, y1, z0], [x0, y1, z0], [x0, y0, z0], [x1, y0, z0]],
+                                4 => [[x1, y1, z1], [x1, y1, z0], [x1, y0, z0], [x1, y0, z1]],
+                                _ => [[x0, y1, z0], [x0, y1, z1], [x0, y0, z1], [x0, y0, z0]],
+                            };
+                            let tint = face.tint.unwrap_or([255; 3]);
+                            let shade = SHADES[d];
+                            let color = [
+                                (tint[0] as f32 * shade) as u8,
+                                (tint[1] as f32 * shade) as u8,
+                                (tint[2] as f32 * shade) as u8,
+                                255,
+                            ];
+                            let uv = face.uv.map(|v| v.clamp(0.0, 1.0));
+                            mesh.opaque.quad(corners, sub(r, uv), color);
+                        }
+                    }
+                    continue;
+                }
                 match &block.shape {
                     Shape::Cuboid { min, max } => {
                         let full = *min == [0.0; 3] && *max == [1.0; 3];

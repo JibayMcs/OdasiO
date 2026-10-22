@@ -71,6 +71,82 @@ pub enum Shape {
     Liquid,
 }
 
+/// Face d'un élément : texture, zone de texture (u0, v0, u1, v1 dans 0..1), teinte, et si
+/// elle peut être cachée par un voisin opaque (face posée sur le bord du bloc).
+#[derive(Debug, Clone, PartialEq)]
+pub struct ElementFace {
+    pub texture: Arc<Texture>,
+    pub uv: [f32; 4],
+    pub tint: Option<[u8; 3]>,
+    pub cull: bool,
+}
+
+/// Boîte d'un modèle détaillé (bornes en blocs, 0..1 pour un bloc), faces dans l'ordre
+/// dessus, dessous, sud, nord, est, ouest.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Element {
+    pub from: [f32; 3],
+    pub to: [f32; 3],
+    pub faces: [Option<ElementFace>; 6],
+}
+
+/// Normales des faces d'un élément, dans l'ordre de `Element::faces`.
+pub const ELEMENT_NORMALS: [[i32; 3]; 6] = [
+    [0, 1, 0],
+    [0, -1, 0],
+    [0, 0, 1],
+    [0, 0, -1],
+    [1, 0, 0],
+    [-1, 0, 0],
+];
+
+impl Element {
+    /// Tourne l'élément autour du centre du bloc, par pas de 90 degrés : `rx` autour de x
+    /// (le haut bascule vers le nord), puis `ry` autour de y (nord vers est, vu de dessus).
+    pub fn rotated(&self, rx: i32, ry: i32) -> Element {
+        let turn = |v: [f32; 3]| -> [f32; 3] {
+            let mut v = v;
+            for _ in 0..(rx / 90).rem_euclid(4) {
+                v = [v[0], v[2], -v[1]];
+            }
+            for _ in 0..(ry / 90).rem_euclid(4) {
+                v = [-v[2], v[1], v[0]];
+            }
+            v
+        };
+        let corners = [self.from, self.to].map(|c| turn([c[0] - 0.5, c[1] - 0.5, c[2] - 0.5]));
+        let from = [0, 1, 2].map(|i| corners[0][i].min(corners[1][i]) + 0.5);
+        let to = [0, 1, 2].map(|i| corners[0][i].max(corners[1][i]) + 0.5);
+        let mut faces: [Option<ElementFace>; 6] = Default::default();
+        for (d, face) in self.faces.iter().enumerate() {
+            let n = ELEMENT_NORMALS[d].map(|x| x as f32);
+            let r = turn(n).map(|x| x.round() as i32);
+            if let Some(target) = ELEMENT_NORMALS.iter().position(|m| *m == r) {
+                faces[target] = face.clone();
+            }
+        }
+        Element { from, to, faces }
+    }
+
+    /// Faces sur le bord du bloc : elles seules peuvent être cachées par un voisin.
+    pub fn mark_cull(&mut self) {
+        let edge = |d: usize| match d {
+            0 => self.to[1] >= 0.999,
+            1 => self.from[1] <= 0.001,
+            2 => self.to[2] >= 0.999,
+            3 => self.from[2] <= 0.001,
+            4 => self.to[0] >= 0.999,
+            _ => self.from[0] <= 0.001,
+        };
+        let edges: [bool; 6] = std::array::from_fn(edge);
+        for (face, on_edge) in self.faces.iter_mut().zip(edges) {
+            if let Some(face) = face {
+                face.cull = on_edge;
+            }
+        }
+    }
+}
+
 /// Aspect d'un bloc vu de dessus, du sud et de l'est.
 #[derive(Debug, Clone, PartialEq)]
 pub struct BlockLook {
@@ -80,6 +156,8 @@ pub struct BlockLook {
     pub east: Face,
     /// Cube plein et opaque : cache les faces voisines.
     pub opaque: bool,
+    /// Modèle détaillé (vide : la forme simplifiée suffit).
+    pub elements: Vec<Element>,
 }
 
 impl BlockLook {
@@ -95,7 +173,22 @@ impl BlockLook {
             south,
             east,
             opaque,
+            elements: Vec::new(),
         }
+    }
+
+    /// Ajoute le modèle détaillé ; seul un cube plein aux faces opaques cache ses voisins.
+    pub fn with_elements(mut self, elements: Vec<Element>) -> Self {
+        let single_cube = elements.len() == 1
+            && elements[0].from.iter().all(|&v| v <= 0.001)
+            && elements[0].to.iter().all(|&v| v >= 0.999)
+            && elements[0]
+                .faces
+                .iter()
+                .all(|f| f.as_ref().is_some_and(|f| f.texture.is_opaque()));
+        self.opaque = single_cube;
+        self.elements = elements;
+        self
     }
 
     /// Couleur moyenne vue du dessus (texture du dessus teintée), pour les cartes.
@@ -121,6 +214,7 @@ impl BlockLook {
             south: face.clone(),
             east: face,
             opaque: false,
+            elements: Vec::new(),
         }
     }
 }

@@ -11,7 +11,7 @@ use odasio_mc::BlockState;
 use serde_json::Value;
 use zip::ZipArchive;
 
-use crate::look::{BlockLook, Face, Shape, Texture};
+use crate::look::{BlockLook, Element, ElementFace, Face, Shape, Texture};
 
 const GRASS: [u8; 3] = [0x91, 0xbd, 0x59];
 const FOLIAGE: [u8; 3] = [0x48, 0xb5, 0x18];
@@ -241,6 +241,121 @@ impl McAssets {
             .and_then(|p| pick(p.get("apply")?))
     }
 
+    /// Modèles (et rotations) qui composent l'état : la variante choisie, ou toutes les
+    /// parties multipart dont la condition est remplie (bras des barrières, des murs...).
+    fn parts(&self, state: &BlockState) -> Vec<(String, i32, i32)> {
+        let path = state.name.strip_prefix("minecraft:").unwrap_or(&state.name);
+        let Some(json) = self.json(&format!("assets/minecraft/blockstates/{path}.json")) else {
+            return Vec::new();
+        };
+        let Some(parts) = json.get("multipart").and_then(Value::as_array) else {
+            return self.variant(state).into_iter().collect();
+        };
+        fn holds(state: &BlockState, when: &Value) -> bool {
+            let Some(when) = when.as_object() else {
+                return true;
+            };
+            if let Some(Value::Array(any)) = when.get("OR") {
+                return any.iter().any(|w| holds(state, w));
+            }
+            if let Some(Value::Array(all)) = when.get("AND") {
+                return all.iter().all(|w| holds(state, w));
+            }
+            when.iter().all(|(k, v)| {
+                let wanted = match v {
+                    Value::String(s) => s.clone(),
+                    other => other.to_string(),
+                };
+                state
+                    .property(k)
+                    .is_some_and(|p| wanted.split('|').any(|w| w == p))
+            })
+        }
+        parts
+            .iter()
+            .filter(|p| p.get("when").is_none_or(|w| holds(state, w)))
+            .filter_map(|p| {
+                let apply = p.get("apply")?;
+                let v = match apply {
+                    Value::Array(list) => list.first()?,
+                    v => v,
+                };
+                Some((
+                    v.get("model")?.as_str()?.to_string(),
+                    v.get("x").and_then(Value::as_i64).unwrap_or(0) as i32,
+                    v.get("y").and_then(Value::as_i64).unwrap_or(0) as i32,
+                ))
+            })
+            .collect()
+    }
+
+    /// Éléments détaillés des modèles d'un état, tournés comme dans le blockstate.
+    fn elements(&self, state: &BlockState) -> Vec<Element> {
+        let mut out = Vec::new();
+        for (model_id, rx, ry) in self.parts(state) {
+            let Some(model) = self.model(&model_id) else {
+                continue;
+            };
+            for element in model.elements.iter().flatten() {
+                let read = |key: &str| -> Option<[f32; 3]> {
+                    let a = element.get(key)?.as_array()?;
+                    Some([0, 1, 2].map(|i| a.get(i).and_then(Value::as_f64).unwrap_or(0.0) as f32))
+                };
+                let (Some(from), Some(to)) = (read("from"), read("to")) else {
+                    continue;
+                };
+                let Some(Value::Object(faces)) = element.get("faces") else {
+                    continue;
+                };
+                // Faces dans l'ordre dessus, dessous, sud, nord, est, ouest ; UV par défaut
+                // tirés des bornes de l'élément (en seizièmes).
+                let defaults = [
+                    [from[0], from[2], to[0], to[2]],
+                    [from[0], 16.0 - to[2], to[0], 16.0 - from[2]],
+                    [from[0], 16.0 - to[1], to[0], 16.0 - from[1]],
+                    [16.0 - to[0], 16.0 - to[1], 16.0 - from[0], 16.0 - from[1]],
+                    [16.0 - to[2], 16.0 - to[1], 16.0 - from[2], 16.0 - from[1]],
+                    [from[2], 16.0 - to[1], to[2], 16.0 - from[1]],
+                ];
+                let names = ["up", "down", "south", "north", "east", "west"];
+                let faces: [Option<ElementFace>; 6] = std::array::from_fn(|d| {
+                    let face = faces.get(names[d])?;
+                    let reference = face.get("texture")?.as_str()?;
+                    let texture = self.resolve(&model, reference)?;
+                    let uv = face
+                        .get("uv")
+                        .and_then(Value::as_array)
+                        .and_then(|a| {
+                            let v: Vec<f32> = a
+                                .iter()
+                                .filter_map(|x| x.as_f64().map(|x| x as f32))
+                                .collect();
+                            (v.len() == 4).then(|| [v[0], v[1], v[2], v[3]])
+                        })
+                        .unwrap_or(defaults[d]);
+                    Some(ElementFace {
+                        texture,
+                        uv: uv.map(|x| x / 16.0),
+                        tint: face
+                            .get("tintindex")
+                            .is_some()
+                            .then(|| Self::tint_for(&state.name, reference)),
+                        cull: false,
+                    })
+                });
+                let mut element = Element {
+                    from: from.map(|x| x / 16.0),
+                    to: to.map(|x| x / 16.0),
+                    faces,
+                }
+                .rotated(rx, ry);
+                element.mark_cull();
+                out.push(element);
+            }
+        }
+        out
+    }
+
     fn tint_for(name: &str, texture_id: &str) -> [u8; 3] {
         if name.contains("water") || texture_id.contains("water") {
             WATER
@@ -371,7 +486,7 @@ impl McAssets {
         let east = face([1, 0, 0])?;
 
         let (lo, hi) = rotate_bounds(min, max, rx, ry);
-        Some(BlockLook::cuboid(lo, hi, top, south, east))
+        Some(BlockLook::cuboid(lo, hi, top, south, east).with_elements(self.elements(state)))
     }
 }
 
