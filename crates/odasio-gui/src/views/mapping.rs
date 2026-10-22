@@ -9,6 +9,7 @@ use odasio_core::mapping::{Action, Category, Quality};
 use odasio_core::plan::{Group, PlanEntry};
 
 use crate::app::OdasioApp;
+use crate::i18n::{self, tr, trf};
 use crate::theme::{self, Palette};
 use crate::views::analysis;
 
@@ -37,9 +38,9 @@ pub struct ViewState {
 
 fn action_label(action: &Action) -> String {
     match action {
-        Action::Keep => "Garder la proposition".into(),
-        Action::Air => "Remplacer par de l'air".into(),
-        Action::Block(code) => format!("Remplacer par {code}"),
+        Action::Keep => tr("mapping.action_keep").into(),
+        Action::Air => tr("mapping.action_air").into(),
+        Action::Block(code) => trf("mapping.action_block", &[("code", code)]),
     }
 }
 
@@ -57,14 +58,8 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         return;
     };
 
-    ui.heading("Correspondances des blocs");
-    ui.label(
-        RichText::new(
-            "Les blocs présents dans votre monde et leur équivalent Vintage Story. \
-             Décidez par groupe, ou bloc par bloc : vos choix s'appliquent à la conversion.",
-        )
-        .color(p.muted),
-    );
+    ui.heading(tr("common.mapping_title"));
+    ui.label(RichText::new(tr("mapping.subtitle")).color(p.muted));
     ui.add_space(theme::GAP);
 
     theme::card(ui).show(ui, |ui| {
@@ -73,11 +68,9 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         ui.add_space(4.0);
         let review = plan.needs_review().count();
         let text = if review == 0 {
-            "Tout est tranché : la conversion peut être lancée.".to_string()
-        } else if review == 1 {
-            "1 état de bloc mérite un coup d'œil.".to_string()
+            tr("mapping.review_none").to_string()
         } else {
-            format!("{review} états de bloc méritent un coup d'œil.")
+            i18n::plural(review as u64, "mapping.review.one", "mapping.review.other")
         };
         ui.label(RichText::new(text).color(if review == 0 { p.success } else { p.muted }));
     });
@@ -86,14 +79,11 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
     let view = &mut app.mapping_view;
     ui.add(
         egui::TextEdit::singleline(&mut view.filter)
-            .hint_text("Rechercher un bloc Minecraft ou Vintage Story...")
+            .hint_text(tr("mapping.search_hint"))
             .margin(egui::Margin::symmetric(10, 7))
             .desired_width(f32::INFINITY),
     );
-    ui.checkbox(
-        &mut view.show_all,
-        "Afficher aussi les blocs exacts et équivalents",
-    );
+    ui.checkbox(&mut view.show_all, tr("mapping.show_all"));
     ui.add_space(theme::GAP);
 
     let filter = view.filter.trim().to_lowercase();
@@ -175,13 +165,13 @@ fn group_card(
     theme::card(ui).show(ui, |ui| {
         ui.set_width(ui.available_width());
         ui.horizontal_wrapped(|ui| {
-            theme::badge(ui, quality.label(), p.quality(quality));
-            ui.label(RichText::new(category.label()).size(16.5).strong());
+            theme::badge(ui, i18n::quality(quality), p.quality(quality));
+            ui.label(RichText::new(i18n::category(category)).size(16.5).strong());
             ui.label(
                 RichText::new(format!(
-                    "{} états · {} blocs",
-                    entries.len(),
-                    theme::thousands(group.blocks)
+                    "{} · {}",
+                    i18n::plural(entries.len() as u64, "unit.state.one", "unit.state.other"),
+                    i18n::plural(group.blocks, "unit.block.one", "unit.block.other")
                 ))
                 .color(p.muted),
             );
@@ -209,7 +199,7 @@ fn group_card(
                         if ui
                             .selectable_label(
                                 matches!(action, Action::Block(_)),
-                                "Remplacer par un bloc...",
+                                tr("mapping.action_pick"),
                             )
                             .clicked()
                         {
@@ -226,7 +216,7 @@ fn group_card(
             quality > Quality::Equivalent,
         )
         .show_header(ui, |ui| {
-            ui.label(RichText::new("Détail des blocs").color(p.muted));
+            ui.label(RichText::new(tr("common.block_details")).color(p.muted));
         })
         .body(|ui| {
             let row_height = 30.0;
@@ -240,7 +230,7 @@ fn group_card(
                 .column(Column::remainder().at_least(160.0).clip(true))
                 .column(Column::auto().at_least(150.0))
                 .header(22.0, |mut header| {
-                    for title in ["Minecraft", "Blocs", "Vintage Story", ""] {
+                    for title in ["Minecraft", tr("common.col_blocks"), "Vintage Story", ""] {
                         header.col(|ui| {
                             ui.label(RichText::new(title).size(12.5).color(p.muted));
                         });
@@ -277,11 +267,11 @@ fn group_card(
                             });
                             row.col(|ui| {
                                 let name = entry.state.name.clone();
-                                if ui.small_button("Changer").clicked() {
+                                if ui.small_button(tr("mapping.change")).clicked() {
                                     on(Event::PickBlock(state.clone(), name.clone()));
                                 }
                                 if entry.resolved.source == odasio_core::mapping::Source::Override
-                                    && ui.small_button("Annuler").clicked()
+                                    && ui.small_button(tr("mapping.clear_override")).clicked()
                                 {
                                     on(Event::ClearOverride(state, name));
                                 }
@@ -291,11 +281,8 @@ fn group_card(
                 });
             if entries.len() > 200 {
                 ui.label(
-                    RichText::new(format!(
-                        "... et {} autres, affinez la recherche.",
-                        entries.len() - 200
-                    ))
-                    .color(p.muted),
+                    RichText::new(trf("mapping.more", &[("n", &(entries.len() - 200))]))
+                        .color(p.muted),
                 );
             }
         });
@@ -323,29 +310,39 @@ fn picker(app: &mut OdasioApp, ctx: &egui::Context) -> bool {
             let p = Palette::of(ui);
             ui.set_width(560.0f32.min(ctx.screen_rect().width() - 80.0));
             let title = match &state.target {
-                PickTarget::Block { state: s, .. } => format!("Bloc Vintage Story pour {s}"),
-                PickTarget::Group(q, c) => format!("Remplacer « {} / {} »", q.label(), c.label()),
+                PickTarget::Block { state: s, .. } => trf("mapping.picker_block", &[("state", s)]),
+                PickTarget::Group(q, c) => trf(
+                    "mapping.picker_group",
+                    &[
+                        ("quality", &i18n::quality(*q)),
+                        ("category", &i18n::category(*c)),
+                    ],
+                ),
             };
             ui.label(RichText::new(title).size(17.0).strong());
             ui.add_space(6.0);
             if let PickTarget::Block { name, .. } = &state.target {
                 ui.checkbox(
                     &mut state.whole_id,
-                    format!("Appliquer à tous les états de {name}"),
+                    trf("mapping.picker_whole_id", &[("name", name)]),
                 );
             }
             let search = ui.add(
                 egui::TextEdit::singleline(&mut state.query)
-                    .hint_text("Rechercher : rock granite, planks oak, glass...")
+                    .hint_text(tr("mapping.picker_hint"))
                     .desired_width(f32::INFINITY),
             );
             search.request_focus();
             ui.add_space(4.0);
             let hits = catalog::search(&state.query, 300);
             ui.label(
-                RichText::new(format!("{} résultats", hits.len()))
-                    .size(12.0)
-                    .color(p.muted),
+                RichText::new(i18n::plural(
+                    hits.len() as u64,
+                    "unit.result.one",
+                    "unit.result.other",
+                ))
+                .size(12.0)
+                .color(p.muted),
             );
             egui::ScrollArea::vertical()
                 .max_height(340.0)
@@ -354,7 +351,7 @@ fn picker(app: &mut OdasioApp, ctx: &egui::Context) -> bool {
                     if ui
                         .selectable_label(
                             false,
-                            RichText::new("game:air  (supprimer le bloc)").monospace(),
+                            RichText::new(tr("mapping.picker_air")).monospace(),
                         )
                         .clicked()
                     {
@@ -371,7 +368,7 @@ fn picker(app: &mut OdasioApp, ctx: &egui::Context) -> bool {
                 });
             ui.add_space(8.0);
             ui.horizontal(|ui| {
-                if theme::secondary_button(ui, "Annuler").clicked() {
+                if theme::secondary_button(ui, tr("common.cancel")).clicked() {
                     close = true;
                 }
             });

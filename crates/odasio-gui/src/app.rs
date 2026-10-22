@@ -5,6 +5,7 @@ use eframe::egui::{self, Align, Layout, RichText, Stroke, Ui};
 use odasio_core::mc::World;
 use odasio_core::{ConversionPlan, ConvertReport, GameMode, Inventory, Mapping, Season, WorldType};
 
+use crate::i18n::{self, Lang, tr, trf};
 use crate::recent::Recent;
 use crate::task::Task;
 use crate::theme::{self, Palette};
@@ -29,13 +30,13 @@ impl Step {
     ];
 
     pub fn label(self) -> &'static str {
-        match self {
-            Step::World => "Monde",
-            Step::Analysis => "Analyse",
-            Step::Mapping => "Correspondances",
-            Step::Options => "Options",
-            Step::Convert => "Conversion",
-        }
+        tr(match self {
+            Step::World => "step.world",
+            Step::Analysis => "step.analysis",
+            Step::Mapping => "step.mapping",
+            Step::Options => "step.options",
+            Step::Convert => "step.convert",
+        })
     }
 }
 
@@ -166,12 +167,12 @@ impl OdasioApp {
         };
         let files = dim.region_files().unwrap_or_default();
         self.plan = None;
-        self.scan = Some(Task::spawn(ctx, "Lecture des régions...", move |r| {
+        self.scan = Some(Task::spawn(ctx, tr("analysis.scan_start"), move |r| {
             let total = files.len().max(1);
             let inventory = Inventory::scan(&files, |done| {
                 r.progress(
                     Some(done as f32 / total as f32),
-                    format!("Lecture des régions : {done} / {total}"),
+                    trf("analysis.scan", &[("done", &done), ("total", &total)]),
                 )
             });
             Ok(Arc::new(inventory))
@@ -216,12 +217,13 @@ impl OdasioApp {
             );
             ui.label(RichText::new("OdasiO").size(22.0).strong().color(p.accent));
             let subtitle = match self.direction {
-                Direction::ToVintageStory => "Minecraft vers Vintage Story",
-                Direction::ToMinecraft => "Vintage Story vers Minecraft",
+                Direction::ToVintageStory => tr("app.subtitle_to_vs"),
+                Direction::ToMinecraft => tr("app.subtitle_to_mc"),
             };
             ui.label(RichText::new(subtitle).color(p.muted));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 egui::widgets::global_theme_preference_switch(ui);
+                language_switch(ui);
             });
         });
         ui.add_space(10.0);
@@ -269,7 +271,7 @@ impl OdasioApp {
     fn footer(&mut self, ui: &mut Ui) {
         let index = Step::ALL.iter().position(|s| *s == self.step).unwrap_or(0);
         ui.horizontal(|ui| {
-            if index > 0 && theme::secondary_button(ui, "‹  Retour").clicked() {
+            if index > 0 && theme::secondary_button(ui, tr("app.back")).clicked() {
                 self.step = Step::ALL[index - 1];
             }
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -377,4 +379,32 @@ fn direction_switch(app: &mut OdasioApp, ui: &mut Ui) {
         }
     });
     ui.add_space(theme::GAP + 4.0);
+}
+
+/// Choix compact de la langue, dans l'en-tête à côté du thème.
+fn language_switch(ui: &mut Ui) {
+    let p = Palette::of(ui);
+    ui.add_space(4.0);
+    // Disposition de droite à gauche : EN puis FR pour lire « FR EN ».
+    ui.spacing_mut().item_spacing.x = 2.0;
+    ui.spacing_mut().button_padding = egui::vec2(8.0, 3.0);
+    for lang in Lang::ALL.into_iter().rev() {
+        let selected = i18n::current() == lang;
+        let text = RichText::new(lang.code().to_uppercase()).size(12.5);
+        let button = egui::Button::new(if selected {
+            text.strong().color(p.accent_text)
+        } else {
+            text.color(p.muted)
+        })
+        .fill(if selected {
+            p.accent
+        } else {
+            egui::Color32::TRANSPARENT
+        })
+        .stroke(Stroke::NONE)
+        .min_size(egui::vec2(30.0, 24.0));
+        if ui.add(button).on_hover_text(tr("app.language")).clicked() && !selected {
+            i18n::set(lang);
+        }
+    }
 }

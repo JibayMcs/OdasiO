@@ -7,6 +7,7 @@ use odasio_core::mc::World;
 use odasio_core::{ConvertOptions, Progress};
 
 use crate::app::OdasioApp;
+use crate::i18n::{tr, trf};
 use crate::task::{State, Task};
 use crate::theme::{self, Palette};
 
@@ -43,18 +44,18 @@ fn start(app: &mut OdasioApp, ctx: &egui::Context) {
     opts.game_mode = app.form.game_mode;
     let mapping = app.mapping.clone();
 
-    app.convert = Some(Task::spawn(ctx, "Préparation...", move |r| {
+    app.convert = Some(Task::spawn(ctx, tr("common.preparing"), move |r| {
         let world = World::open(&path)?;
         let report = odasio_core::convert(&world, &mapping, &opts, |progress| match progress {
-            Progress::GeneratingTemplate => r.progress(
-                None,
-                "Création du monde modèle par le serveur Vintage Story...",
-            ),
+            Progress::GeneratingTemplate => r.progress(None, tr("convert.template")),
             Progress::Converting { done, total } => r.progress(
                 Some(done as f32 / total.max(1) as f32),
-                format!("Conversion des régions : {done} / {total}"),
+                trf(
+                    "common.regions_progress",
+                    &[("done", &done), ("total", &total)],
+                ),
             ),
-            Progress::Finishing => r.progress(Some(1.0), "Finalisation de la sauvegarde..."),
+            Progress::Finishing => r.progress(Some(1.0), tr("convert.finishing")),
         })?;
         Ok(Arc::new(report))
     }));
@@ -72,7 +73,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
     let Some(loaded) = &app.world else {
         return;
     };
-    ui.heading("Conversion");
+    ui.heading(tr("common.convert_title"));
     ui.add_space(theme::GAP);
 
     theme::card(ui).show(ui, |ui| {
@@ -83,41 +84,47 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
             .show(ui, |ui| {
                 summary_row(
                     ui,
-                    "Monde Minecraft",
+                    tr("common.mc_world"),
                     format!("{} ({})", loaded.world.level.name, loaded.dimension),
                 );
-                summary_row(ui, "Monde Vintage Story", app.form.world_name.clone());
-                summary_row(ui, "Fichier", app.form.output.display().to_string());
+                summary_row(ui, tr("convert.vs_world"), app.form.world_name.clone());
                 summary_row(
                     ui,
-                    "Réglages",
-                    format!(
-                        "roche {}, hauteur {}, décalage {:+}",
-                        app.mapping.settings.rock, app.form.map_size_y, app.form.y_offset
+                    tr("convert.file"),
+                    app.form.output.display().to_string(),
+                );
+                summary_row(
+                    ui,
+                    tr("convert.settings"),
+                    trf(
+                        "convert.settings_value",
+                        &[
+                            ("rock", &app.mapping.settings.rock),
+                            ("height", &app.form.map_size_y),
+                            ("offset", &format!("{:+}", app.form.y_offset)),
+                        ],
                     ),
                 );
                 let choices = app.mapping.policy.overrides.len() + app.mapping.policy.rules.len();
-                summary_row(ui, "Vos choix de correspondance", choices.to_string());
+                summary_row(ui, tr("convert.choices"), choices.to_string());
             });
     });
     ui.add_space(theme::GAP);
 
     let running = app.convert.as_ref().is_some_and(|t| t.is_running());
     let blocked = if app.form.world_name.trim().is_empty() {
-        Some("Donnez un nom au monde dans les options.")
+        Some(tr("convert.no_name"))
     } else if !running && app.form.output.exists() && !app.form.overwrite && !produced_here(app) {
-        Some(
-            "Une sauvegarde porte déjà ce nom : changez-le ou autorisez le remplacement dans les options.",
-        )
+        Some(tr("convert.exists"))
     } else {
         None
     };
 
     ui.horizontal(|ui| {
         let label = if app.convert.is_some() && !running {
-            "Convertir à nouveau"
+            tr("common.convert_again")
         } else {
-            "Convertir"
+            tr("common.convert_start")
         };
         if theme::primary_button(ui, label, !running && blocked.is_none()).clicked() {
             start(app, ui.ctx());
@@ -135,7 +142,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         State::Running { progress, message } => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                theme::section(ui, "Conversion en cours", message);
+                theme::section(ui, tr("common.convert_running"), message);
                 match progress {
                     Some(v) => {
                         ui.add(egui::ProgressBar::new(*v).show_percentage().fill(p.accent));
@@ -144,7 +151,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
                     None => {
                         ui.horizontal(|ui| {
                             ui.add(egui::Spinner::new().size(20.0).color(p.accent));
-                            ui.label(RichText::new("Patientez, cela prend quelques secondes.").color(p.muted));
+                            ui.label(RichText::new(tr("convert.wait")).color(p.muted));
                         });
                     }
                 }
@@ -153,40 +160,63 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         State::Failed(error) => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                theme::section(ui, "La conversion a échoué", "");
+                theme::section(ui, tr("convert.failed"), "");
                 ui.label(RichText::new(error).color(p.danger));
             });
         }
         State::Done(report) => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                ui.label(RichText::new("✔  Monde converti").size(19.0).strong().color(p.success));
                 ui.label(
-                    RichText::new(format!(
-                        "En {:.1} s. Ouvrez Vintage Story, puis Solo : le monde « {} » est dans la liste.",
-                        report.elapsed.as_secs_f32(),
-                        app.form.world_name
+                    RichText::new(tr("common.converted"))
+                        .size(19.0)
+                        .strong()
+                        .color(p.success),
+                );
+                ui.label(
+                    RichText::new(trf(
+                        "convert.done",
+                        &[
+                            ("secs", &theme::decimal(report.elapsed.as_secs_f64(), 1)),
+                            ("name", &app.form.world_name),
+                        ],
                     ))
                     .color(p.muted),
                 );
                 ui.add_space(10.0);
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing.x = 42.0;
-                    theme::stat(ui, &theme::thousands(report.mc_chunks as u64), "chunks Minecraft");
-                    theme::stat(ui, &theme::thousands(report.columns as u64), "colonnes Vintage Story");
-                    theme::stat(ui, &theme::thousands(report.skipped_chunks as u64), "chunks ignorés");
-                    theme::stat(ui, &theme::thousands(report.clipped_blocks), "blocs hors hauteur");
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.mc_chunks as u64),
+                        tr("common.mc_chunks"),
+                    );
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.columns as u64),
+                        tr("convert.columns"),
+                    );
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.skipped_chunks as u64),
+                        tr("convert.skipped"),
+                    );
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.clipped_blocks),
+                        tr("convert.clipped"),
+                    );
                 });
                 if !report.missing_codes.is_empty() {
                     ui.add_space(8.0);
-                    ui.label(RichText::new("Blocs inconnus du jeu, remplacés par de l'air :").color(p.warning));
+                    ui.label(RichText::new(tr("convert.missing")).color(p.warning));
                     for code in report.missing_codes.keys() {
                         ui.label(RichText::new(format!("•  {code}")).monospace());
                     }
                 }
                 ui.add_space(10.0);
                 if let Some(dir) = app.form.output.parent()
-                    && theme::secondary_button(ui, "Ouvrir le dossier des sauvegardes").clicked()
+                    && theme::secondary_button(ui, tr("convert.open_folder")).clicked()
                 {
                     open_in_file_manager(dir);
                 }

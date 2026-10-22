@@ -8,12 +8,18 @@ pub struct Recent {
     pub paths: Vec<PathBuf>,
 }
 
-fn file() -> Option<PathBuf> {
+/// Fichier de configuration d'OdasiO : `%APPDATA%/odasio` sous Windows,
+/// `~/.config/odasio` ailleurs.
+pub fn config_file(name: &str) -> Option<PathBuf> {
     let base = std::env::var_os("APPDATA")
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from))
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".config")))?;
-    Some(base.join("odasio").join("recent.txt"))
+    Some(base.join("odasio").join(name))
+}
+
+fn file() -> Option<PathBuf> {
+    config_file("recent.txt")
 }
 
 impl Recent {

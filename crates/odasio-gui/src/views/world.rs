@@ -7,6 +7,7 @@ use odasio_core::mc::LevelInfo;
 use odasio_core::paths;
 
 use crate::app::OdasioApp;
+use crate::i18n::tr;
 use crate::theme::{self, Palette};
 
 #[derive(Clone)]
@@ -93,10 +94,14 @@ fn world_card(ui: &mut Ui, card: &Card, width: f32) -> bool {
                             ui.label(RichText::new(format!("({folder})")).color(p.muted));
                         }
                         if card.recent {
-                            theme::badge(ui, "récent", p.accent);
+                            theme::badge(ui, tr("world.recent"), p.accent);
                         }
                         if card.modded {
-                            theme::badge(ui, "moddé", p.quality(odasio_core::Quality::Unmapped));
+                            theme::badge(
+                                ui,
+                                tr("world.modded"),
+                                p.quality(odasio_core::Quality::Unmapped),
+                            );
                         }
                     });
                     ui.label(RichText::new(&card.version).color(p.muted));
@@ -133,18 +138,13 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
 
     ui.horizontal(|ui| {
         ui.vertical(|ui| {
-            ui.heading("Choisissez un monde Minecraft");
-            ui.label(
-                RichText::new(
-                    "Java Edition, de la bêta aux dernières versions. Le monde n'est jamais modifié.",
-                )
-                .color(p.muted),
-            );
+            ui.heading(tr("world.title"));
+            ui.label(RichText::new(tr("world.subtitle")).color(p.muted));
         });
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            if theme::primary_button(ui, "Parcourir...", true).clicked()
+            if theme::primary_button(ui, tr("common.browse"), true).clicked()
                 && let Some(dir) = rfd::FileDialog::new()
-                    .set_title("Dossier du monde Minecraft (contient level.dat)")
+                    .set_title(tr("world.dialog"))
                     .pick_folder()
             {
                 app.open_world(ui.ctx(), &dir);
@@ -162,7 +162,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
             .inner_margin(12)
             .show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                ui.label(RichText::new("Ce dossier ne peut pas être ouvert").strong());
+                ui.label(RichText::new(tr("world.open_error")).strong());
                 ui.label(error);
             });
         ui.add_space(theme::GAP);
@@ -174,14 +174,8 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
             ui.set_width(ui.available_width());
             ui.vertical_centered(|ui| {
                 ui.add_space(24.0);
-                ui.label(RichText::new("Aucun monde détecté").size(18.0).strong());
-                ui.label(
-                    RichText::new(
-                        "Aucun dossier .minecraft/saves trouvé. Utilisez « Parcourir... » pour \
-                         sélectionner le dossier d'un monde.",
-                    )
-                    .color(p.muted),
-                );
+                ui.label(RichText::new(tr("world.empty_title")).size(18.0).strong());
+                ui.label(RichText::new(tr("world.empty_hint")).color(p.muted));
                 ui.add_space(24.0);
             });
         });

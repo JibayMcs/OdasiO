@@ -1,4 +1,5 @@
 mod app;
+mod i18n;
 mod recent;
 mod task;
 mod theme;
@@ -11,6 +12,7 @@ fn main() -> eframe::Result {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
         .init();
+    i18n::init();
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

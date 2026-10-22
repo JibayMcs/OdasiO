@@ -7,6 +7,8 @@ use eframe::egui::{
 };
 use odasio_core::Quality;
 
+use crate::i18n::{self, Lang};
+
 pub const RADIUS: u8 = 10;
 pub const GAP: f32 = 12.0;
 /// Largeur maximale du contenu : au-delà, il est centré.
@@ -225,30 +227,48 @@ pub fn stat(ui: &mut Ui, value: &str, label: &str) {
     });
 }
 
-/// Nombre lisible : 1 234 567.
+/// Nombre lisible selon la langue : 1 234 567 ou 1,234,567.
 pub fn thousands(n: u64) -> String {
+    let sep = match i18n::current() {
+        Lang::Fr => ' ',
+        Lang::En => ',',
+    };
     let digits = n.to_string();
     let mut out = String::new();
     for (i, c) in digits.chars().enumerate() {
         if i > 0 && (digits.len() - i) % 3 == 0 {
-            out.push(' ');
+            out.push(sep);
         }
         out.push(c);
     }
     out
 }
 
+/// Nombre décimal selon la langue : virgule en français, point en anglais.
+pub fn decimal(v: f64, digits: usize) -> String {
+    let text = format!("{v:.digits$}");
+    match i18n::current() {
+        Lang::Fr => text.replace('.', ","),
+        Lang::En => text,
+    }
+}
+
 /// Pourcentage adaptatif : les petites parts restent visibles.
 pub fn percent(part: u64, total: u64) -> String {
-    if total == 0 {
-        return "0 %".into();
-    }
-    let v = part as f64 * 100.0 / total as f64;
-    match v {
-        0.0 => "0 %".into(),
-        v if v < 0.01 => "< 0,01 %".into(),
-        v if v < 10.0 => format!("{v:.2} %").replace('.', ","),
-        v => format!("{v:.1} %").replace('.', ","),
+    let v = if total == 0 {
+        0.0
+    } else {
+        part as f64 * 100.0 / total as f64
+    };
+    let (prefix, value) = match v {
+        0.0 => ("", "0".to_string()),
+        v if v < 0.01 => ("< ", decimal(0.01, 2)),
+        v if v < 10.0 => ("", decimal(v, 2)),
+        v => ("", decimal(v, 1)),
+    };
+    match i18n::current() {
+        Lang::Fr => format!("{prefix}{value} %"),
+        Lang::En => format!("{prefix}{value}%"),
     }
 }
 
@@ -263,15 +283,6 @@ pub fn converted_name(name: &str) -> String {
         base
     };
     format!("{base} (OdasiO)")
-}
-
-/// « 1 type », « 3 types ».
-pub fn plural(n: usize, singular: &str, plural: &str) -> String {
-    format!(
-        "{} {}",
-        thousands(n as u64),
-        if n > 1 { plural } else { singular }
-    )
 }
 
 #[cfg(test)]

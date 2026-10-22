@@ -15,6 +15,7 @@ use odasio_core::vs::VsDatabase;
 use odasio_core::vs_inventory::VsInventory;
 
 use crate::app::OdasioApp;
+use crate::i18n::{self, tr, trf};
 use crate::task::{State, Task};
 use crate::theme::{self, Palette};
 use crate::views::analysis;
@@ -23,7 +24,9 @@ use crate::views::analysis;
 pub struct SaveCard {
     pub path: PathBuf,
     pub name: String,
-    pub details: String,
+    pub world_type: String,
+    pub height: u32,
+    pub bytes: u64,
 }
 
 pub struct LoadedSave {
@@ -88,9 +91,24 @@ fn minecraft_saves() -> PathBuf {
     })
 }
 
-fn file_size(path: &Path) -> String {
-    let bytes = std::fs::metadata(path).map_or(0, |m| m.len());
-    format!("{:.0} Mo", bytes as f64 / 1_048_576.0)
+/// Taille lisible, en mégaoctets.
+fn file_size(bytes: u64) -> String {
+    trf(
+        "reverse.size_mb",
+        &[("n", &format!("{:.0}", bytes as f64 / 1_048_576.0))],
+    )
+}
+
+/// Ligne de détail d'une carte, formatée à l'affichage pour suivre la langue.
+fn save_details(save: &SaveCard) -> String {
+    trf(
+        "reverse.save_details",
+        &[
+            ("type", &save.world_type),
+            ("height", &save.height),
+            ("size", &file_size(save.bytes)),
+        ],
+    )
 }
 
 fn discover() -> Vec<SaveCard> {
@@ -106,12 +124,9 @@ fn discover() -> Vec<SaveCard> {
             let db = VsDatabase::open(&path).ok()?;
             Some(SaveCard {
                 name: db.save.world_name.clone(),
-                details: format!(
-                    "{} · hauteur {} · {}",
-                    db.save.world_type,
-                    db.save.map_size[1],
-                    file_size(&path)
-                ),
+                world_type: db.save.world_type.clone(),
+                height: db.save.map_size[1],
+                bytes: std::fs::metadata(&path).map_or(0, |m| m.len()),
                 path,
             })
         })
@@ -135,11 +150,11 @@ pub fn open_save(app: &mut OdasioApp, ctx: &egui::Context, path: &Path) {
             });
             state.convert = None;
             let path = path.to_path_buf();
-            state.scan = Some(Task::spawn(ctx, "Lecture des colonnes...", move |r| {
+            state.scan = Some(Task::spawn(ctx, tr("reverse.scan_start"), move |r| {
                 let inventory = VsInventory::scan(&path, |done, total| {
                     r.progress(
                         Some(done as f32 / total.max(1) as f32),
-                        format!("Lecture des colonnes : {done} / {total}"),
+                        trf("reverse.scan", &[("done", &done), ("total", &total)]),
                     )
                 })?;
                 Ok(Arc::new(inventory))
@@ -157,16 +172,13 @@ pub fn show_world(app: &mut OdasioApp, ui: &mut Ui) {
     }
     ui.horizontal(|ui| {
         ui.vertical(|ui| {
-            ui.heading("Choisissez une sauvegarde Vintage Story");
-            ui.label(
-                RichText::new("Elle sera convertie en monde Minecraft Java. La sauvegarde n'est jamais modifiée.")
-                    .color(p.muted),
-            );
+            ui.heading(tr("reverse.title"));
+            ui.label(RichText::new(tr("reverse.subtitle")).color(p.muted));
         });
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            if theme::primary_button(ui, "Parcourir...", true).clicked()
+            if theme::primary_button(ui, tr("common.browse"), true).clicked()
                 && let Some(file) = rfd::FileDialog::new()
-                    .add_filter("Sauvegarde Vintage Story", &["vcdbs"])
+                    .add_filter(tr("common.vs_save"), &["vcdbs"])
                     .pick_file()
             {
                 open_save(app, ui.ctx(), &file);
@@ -186,15 +198,8 @@ pub fn show_world(app: &mut OdasioApp, ui: &mut Ui) {
             ui.set_width(ui.available_width());
             ui.vertical_centered(|ui| {
                 ui.add_space(24.0);
-                ui.label(
-                    RichText::new("Aucune sauvegarde détectée")
-                        .size(18.0)
-                        .strong(),
-                );
-                ui.label(
-                    RichText::new("Utilisez « Parcourir... » pour choisir un fichier .vcdbs.")
-                        .color(p.muted),
-                );
+                ui.label(RichText::new(tr("reverse.empty_title")).size(18.0).strong());
+                ui.label(RichText::new(tr("reverse.empty_hint")).color(p.muted));
                 ui.add_space(24.0);
             });
         });
@@ -216,7 +221,7 @@ pub fn show_world(app: &mut OdasioApp, ui: &mut Ui) {
                         ui.set_width(card_width - 38.0);
                         ui.vertical(|ui| {
                             ui.label(RichText::new(&save.name).size(16.5).strong());
-                            ui.label(RichText::new(&save.details).color(p.muted));
+                            ui.label(RichText::new(save_details(save)).color(p.muted));
                             ui.add(
                                 egui::Label::new(
                                     RichText::new(save.path.display().to_string())
@@ -268,7 +273,7 @@ fn scan_status(app: &OdasioApp, ui: &mut Ui) -> Option<Arc<VsInventory>> {
         State::Running { progress, message } => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                theme::section(ui, "Analyse en cours", message);
+                theme::section(ui, tr("common.analysis_running"), message);
                 ui.add(
                     egui::ProgressBar::new(progress.unwrap_or(0.0))
                         .show_percentage()
@@ -292,11 +297,13 @@ pub fn show_analysis(app: &mut OdasioApp, ui: &mut Ui) {
     };
     ui.heading(&save.name);
     ui.label(
-        RichText::new(format!(
-            "Vintage Story · monde {} · hauteur {} · {}",
-            save.world_type,
-            save.height,
-            save.path.display()
+        RichText::new(trf(
+            "reverse.details",
+            &[
+                ("type", &save.world_type),
+                ("height", &save.height),
+                ("path", &save.path.display()),
+            ],
         ))
         .color(p.muted),
     );
@@ -309,27 +316,27 @@ pub fn show_analysis(app: &mut OdasioApp, ui: &mut Ui) {
         ui.set_width(ui.available_width());
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing.x = 42.0;
-            theme::stat(ui, &theme::thousands(inventory.columns as u64), "colonnes");
+            theme::stat(
+                ui,
+                &theme::thousands(inventory.columns as u64),
+                tr("reverse.columns"),
+            );
             theme::stat(
                 ui,
                 &theme::thousands(inventory.counts.len() as u64),
-                "types de blocs",
+                tr("reverse.types"),
             );
             theme::stat(
                 ui,
                 &theme::thousands(inventory.total_blocks()),
-                "blocs (hors air)",
+                tr("common.solid_blocks"),
             );
         });
     });
     ui.add_space(theme::GAP);
     theme::card(ui).show(ui, |ui| {
         ui.set_width(ui.available_width());
-        theme::section(
-            ui,
-            "Fidélité de la conversion",
-            "Part des blocs selon la qualité de leur équivalent Minecraft.",
-        );
+        theme::section(ui, tr("common.fidelity"), tr("reverse.fidelity_hint"));
         analysis::quality_bar(ui, &distribution(&plan));
     });
 }
@@ -340,11 +347,8 @@ pub fn show_mapping(app: &mut OdasioApp, ui: &mut Ui) {
         return;
     };
     let plan = inventory.plan(&app.reverse.mapping);
-    ui.heading("Correspondances des blocs");
-    ui.label(
-        RichText::new("Les blocs présents dans votre sauvegarde et leur équivalent Minecraft.")
-            .color(p.muted),
-    );
+    ui.heading(tr("common.mapping_title"));
+    ui.label(RichText::new(tr("reverse.mapping_subtitle")).color(p.muted));
     ui.add_space(theme::GAP);
     theme::card(ui).show(ui, |ui| {
         ui.set_width(ui.available_width());
@@ -356,13 +360,13 @@ pub fn show_mapping(app: &mut OdasioApp, ui: &mut Ui) {
         theme::card(ui).show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
-                theme::badge(ui, quality.label(), p.quality(*quality));
+                theme::badge(ui, i18n::quality(*quality), p.quality(*quality));
                 let blocks: u64 = entries.iter().map(|e| e.1).sum();
                 ui.label(
                     RichText::new(format!(
-                        "{} · {} blocs",
-                        theme::plural(entries.len(), "type", "types"),
-                        theme::thousands(blocks)
+                        "{} · {}",
+                        i18n::plural(entries.len() as u64, "unit.type.one", "unit.type.other"),
+                        i18n::plural(blocks, "unit.block.one", "unit.block.other")
                     ))
                     .color(p.muted),
                 );
@@ -374,7 +378,7 @@ pub fn show_mapping(app: &mut OdasioApp, ui: &mut Ui) {
                 *quality > Quality::Equivalent,
             )
             .show_header(ui, |ui| {
-                ui.label(RichText::new("Détail des blocs").color(p.muted));
+                ui.label(RichText::new(tr("common.block_details")).color(p.muted));
             })
             .body(|ui| {
                 egui_extras::TableBuilder::new(ui)
@@ -385,7 +389,7 @@ pub fn show_mapping(app: &mut OdasioApp, ui: &mut Ui) {
                     .column(Column::auto().at_least(80.0))
                     .column(Column::remainder().at_least(160.0).clip(true))
                     .header(22.0, |mut header| {
-                        for title in ["Vintage Story", "Blocs", "Minecraft"] {
+                        for title in ["Vintage Story", tr("common.col_blocks"), "Minecraft"] {
                             header.col(|ui| {
                                 ui.label(RichText::new(title).size(12.5).color(p.muted));
                             });
@@ -440,13 +444,8 @@ pub fn show_options(app: &mut OdasioApp, ui: &mut Ui) {
     if !form.output_custom {
         form.output = default_output(&form.world_name);
     }
-    ui.heading("Options du monde Minecraft");
-    ui.label(
-        RichText::new(
-            "Monde Java 1.21.1, mis à jour automatiquement par les versions plus récentes.",
-        )
-        .color(p.muted),
-    );
+    ui.heading(tr("reverse.options_title"));
+    ui.label(RichText::new(tr("reverse.options_subtitle")).color(p.muted));
     ui.add_space(theme::GAP);
     theme::card(ui).show(ui, |ui| {
         ui.set_width(ui.available_width());
@@ -455,11 +454,11 @@ pub fn show_options(app: &mut OdasioApp, ui: &mut Ui) {
             .spacing([28.0, 18.0])
             .min_col_width(170.0)
             .show(ui, |ui| {
-                ui.label(RichText::new("Nom du monde").strong());
+                ui.label(RichText::new(tr("common.world_name")).strong());
                 ui.add(egui::TextEdit::singleline(&mut form.world_name).desired_width(380.0));
                 ui.end_row();
 
-                ui.label(RichText::new("Dossier du monde").strong());
+                ui.label(RichText::new(tr("reverse.folder")).strong());
                 ui.vertical(|ui| {
                     ui.add(
                         egui::Label::new(
@@ -470,42 +469,34 @@ pub fn show_options(app: &mut OdasioApp, ui: &mut Ui) {
                         .truncate(),
                     );
                     ui.horizontal(|ui| {
-                        if ui.button("Choisir...").clicked()
+                        if ui.button(tr("common.choose")).clicked()
                             && let Some(dir) = rfd::FileDialog::new().pick_folder()
                         {
                             form.output = dir.join(form.world_name.trim());
                             form.output_custom = true;
                         }
-                        if form.output_custom && ui.button("Dossier de Minecraft").clicked() {
+                        if form.output_custom && ui.button(tr("reverse.mc_folder")).clicked() {
                             form.output_custom = false;
                         }
                     });
                     if form.output.exists() {
-                        ui.checkbox(&mut form.overwrite, "Remplacer le monde existant");
+                        ui.checkbox(&mut form.overwrite, tr("reverse.overwrite"));
                     }
                 });
                 ui.end_row();
 
-                ui.label(RichText::new("Terrain environnant").strong());
+                ui.label(RichText::new(tr("common.terrain")).strong());
                 ui.vertical(|ui| {
-                    ui.radio_value(
-                        &mut form.generator,
-                        Generator::Ocean,
-                        "Océan : de l'eau à perte de vue (recommandé)",
-                    );
-                    ui.radio_value(
-                        &mut form.generator,
-                        Generator::Normal,
-                        "Terrain Minecraft normal",
-                    );
-                    ui.radio_value(&mut form.generator, Generator::Void, "Vide");
+                    ui.radio_value(&mut form.generator, Generator::Ocean, tr("reverse.ocean"));
+                    ui.radio_value(&mut form.generator, Generator::Normal, tr("reverse.normal"));
+                    ui.radio_value(&mut form.generator, Generator::Void, tr("reverse.void"));
                 });
                 ui.end_row();
 
-                ui.label(RichText::new("Mode de jeu").strong());
+                ui.label(RichText::new(tr("common.game_mode")).strong());
                 ui.horizontal(|ui| {
-                    ui.radio_value(&mut form.creative, true, "Créatif");
-                    ui.radio_value(&mut form.creative, false, "Survie");
+                    ui.radio_value(&mut form.creative, true, tr("common.creative"));
+                    ui.radio_value(&mut form.creative, false, tr("common.survival"));
                 });
                 ui.end_row();
             });
@@ -523,7 +514,7 @@ pub fn show_convert(app: &mut OdasioApp, ui: &mut Ui) {
         return;
     };
     let state = &mut app.reverse;
-    ui.heading("Conversion");
+    ui.heading(tr("common.convert_title"));
     ui.add_space(theme::GAP);
     theme::card(ui).show(ui, |ui| {
         ui.set_width(ui.available_width());
@@ -531,13 +522,13 @@ pub fn show_convert(app: &mut OdasioApp, ui: &mut Ui) {
             .num_columns(2)
             .spacing([24.0, 8.0])
             .show(ui, |ui| {
-                ui.label(RichText::new("Sauvegarde Vintage Story").color(p.muted));
+                ui.label(RichText::new(tr("common.vs_save")).color(p.muted));
                 ui.label(RichText::new(&save_name).strong());
                 ui.end_row();
-                ui.label(RichText::new("Monde Minecraft").color(p.muted));
+                ui.label(RichText::new(tr("common.mc_world")).color(p.muted));
                 ui.label(RichText::new(&state.form.world_name).strong());
                 ui.end_row();
-                ui.label(RichText::new("Dossier").color(p.muted));
+                ui.label(RichText::new(tr("reverse.folder_short")).color(p.muted));
                 ui.add(
                     egui::Label::new(
                         RichText::new(state.form.output.display().to_string()).strong(),
@@ -555,12 +546,12 @@ pub fn show_convert(app: &mut OdasioApp, ui: &mut Ui) {
         .as_ref()
         .is_some_and(|t| t.with(|s| matches!(s, State::Done(_))));
     let blocked = (!running && state.form.output.exists() && !state.form.overwrite && !produced)
-        .then_some("Ce dossier existe déjà : changez le nom ou autorisez le remplacement dans les options.");
+        .then_some(tr("reverse.exists"));
     ui.horizontal(|ui| {
         let label = if state.convert.is_some() && !running {
-            "Convertir à nouveau"
+            tr("common.convert_again")
         } else {
-            "Convertir"
+            tr("common.convert_start")
         };
         if theme::primary_button(ui, label, !running && blocked.is_none()).clicked() {
             let save_path = save_path.clone();
@@ -572,13 +563,16 @@ pub fn show_convert(app: &mut OdasioApp, ui: &mut Ui) {
                 generator: state.form.generator,
                 creative: state.form.creative,
             };
-            state.convert = Some(Task::spawn(ui.ctx(), "Préparation...", move |r| {
+            state.convert = Some(Task::spawn(ui.ctx(), tr("common.preparing"), move |r| {
                 let report = convert_to_minecraft(&save_path, &mapping, &opts, |p| match p {
                     ToMcProgress::Converting { done, total } => r.progress(
                         Some(done as f32 / total.max(1) as f32),
-                        format!("Conversion des régions : {done} / {total}"),
+                        trf(
+                            "common.regions_progress",
+                            &[("done", &done), ("total", &total)],
+                        ),
                     ),
-                    ToMcProgress::Finishing => r.progress(Some(1.0), "Écriture de level.dat..."),
+                    ToMcProgress::Finishing => r.progress(Some(1.0), tr("reverse.finishing")),
                 })?;
                 Ok(Arc::new(report))
             }));
@@ -596,8 +590,12 @@ pub fn show_convert(app: &mut OdasioApp, ui: &mut Ui) {
         State::Running { progress, message } => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                theme::section(ui, "Conversion en cours", message);
-                ui.add(egui::ProgressBar::new(progress.unwrap_or(0.0)).show_percentage().fill(p.accent));
+                theme::section(ui, tr("common.convert_running"), message);
+                ui.add(
+                    egui::ProgressBar::new(progress.unwrap_or(0.0))
+                        .show_percentage()
+                        .fill(p.accent),
+                );
             });
         }
         State::Failed(error) => {
@@ -606,21 +604,40 @@ pub fn show_convert(app: &mut OdasioApp, ui: &mut Ui) {
         State::Done(report) => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                ui.label(RichText::new("✔  Monde converti").size(19.0).strong().color(p.success));
                 ui.label(
-                    RichText::new(format!(
-                        "En {:.1} s. Ouvrez Minecraft 1.21.1 ou plus récent : « {} » est dans la liste des mondes.",
-                        report.elapsed.as_secs_f32(),
-                        state.form.world_name
+                    RichText::new(tr("common.converted"))
+                        .size(19.0)
+                        .strong()
+                        .color(p.success),
+                );
+                ui.label(
+                    RichText::new(trf(
+                        "reverse.done",
+                        &[
+                            ("secs", &theme::decimal(report.elapsed.as_secs_f64(), 1)),
+                            ("name", &state.form.world_name),
+                        ],
                     ))
                     .color(p.muted),
                 );
                 ui.add_space(10.0);
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().item_spacing.x = 42.0;
-                    theme::stat(ui, &theme::thousands(report.chunks as u64), "chunks Minecraft");
-                    theme::stat(ui, &theme::thousands(report.block_entities as u64), "block entities");
-                    theme::stat(ui, &theme::thousands(report.signs as u64), "panneaux avec texte");
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.chunks as u64),
+                        tr("common.mc_chunks"),
+                    );
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.block_entities as u64),
+                        tr("reverse.block_entities"),
+                    );
+                    theme::stat(
+                        ui,
+                        &theme::thousands(report.signs as u64),
+                        tr("reverse.signs"),
+                    );
                 });
             });
         }

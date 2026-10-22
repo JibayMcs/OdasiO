@@ -13,6 +13,8 @@ egui_extras = { version = "0.32.3", features = ["all_loaders"] }
 image = { version = "0.25.9", default-features = false, features = ["png"] }
 odasio-core.workspace = true
 rfd = "0.17.2"
+sys-locale = "0.3.2"
+toml.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 

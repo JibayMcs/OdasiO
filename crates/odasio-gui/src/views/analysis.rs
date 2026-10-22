@@ -4,6 +4,7 @@ use eframe::egui::{self, RichText, Sense, Ui, Vec2};
 use odasio_core::{ConversionPlan, Inventory, Quality};
 
 use crate::app::OdasioApp;
+use crate::i18n::{self, tr, trf};
 use crate::task::State;
 use crate::theme::{self, Palette};
 
@@ -62,7 +63,7 @@ pub fn quality_bar(ui: &mut Ui, distribution: &[(Quality, u64)]) {
                     p.quality(quality),
                 ),
             );
-            job.append(quality.label(), 0.0, format(font.clone(), p.text));
+            job.append(i18n::quality(quality), 0.0, format(font.clone(), p.text));
             job.append(
                 &format!("  {}", theme::percent(n, total)),
                 0.0,
@@ -85,7 +86,10 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
     ui.label(
         RichText::new(format!(
             "{} · {}",
-            level.version_name.as_deref().unwrap_or("version inconnue"),
+            level
+                .version_name
+                .as_deref()
+                .unwrap_or(tr("analysis.unknown_version")),
             loaded.path.display()
         ))
         .color(p.muted),
@@ -102,7 +106,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         .collect();
     let running = app.scan.as_ref().is_some_and(|t| t.is_running());
     ui.horizontal(|ui| {
-        ui.label("Dimension");
+        ui.label(tr("analysis.dimension"));
         ui.add_enabled_ui(!running, |ui| {
             egui::ComboBox::from_id_salt("dimension")
                 .selected_text(&dimension)
@@ -130,7 +134,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         State::Running { progress, message } => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                theme::section(ui, "Analyse en cours", message);
+                theme::section(ui, tr("common.analysis_running"), message);
                 let bar = egui::ProgressBar::new(progress.unwrap_or(0.0))
                     .show_percentage()
                     .animate(true)
@@ -141,7 +145,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
         State::Failed(error) => {
             theme::card(ui).show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                theme::section(ui, "L'analyse a échoué", "");
+                theme::section(ui, tr("analysis.failed"), "");
                 ui.label(RichText::new(error).color(p.danger));
             });
         }
@@ -151,11 +155,7 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
             if let Some(plan) = &app.plan {
                 theme::card(ui).show(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    theme::section(
-                        ui,
-                        "Fidélité de la conversion",
-                        "Part des blocs (hors air) selon la qualité de leur équivalent Vintage Story.",
-                    );
+                    theme::section(ui, tr("common.fidelity"), tr("analysis.fidelity_hint"));
                     quality_bar(ui, &solid_distribution(plan, inventory));
                 });
                 ui.add_space(theme::GAP);
@@ -177,29 +177,38 @@ fn summary(ui: &mut Ui, inventory: &Inventory) {
                 .filter(|(s, _)| !s.is_air())
                 .map(|(_, n)| n)
                 .sum();
-            theme::stat(ui, &theme::thousands(inventory.regions as u64), "régions");
-            theme::stat(ui, &theme::thousands(inventory.chunks as u64), "chunks");
+            theme::stat(
+                ui,
+                &theme::thousands(inventory.regions as u64),
+                tr("analysis.regions"),
+            );
+            theme::stat(
+                ui,
+                &theme::thousands(inventory.chunks as u64),
+                tr("analysis.chunks"),
+            );
             theme::stat(
                 ui,
                 &theme::thousands(inventory.counts.len() as u64),
-                "états de bloc",
+                tr("analysis.states"),
             );
-            theme::stat(ui, &theme::thousands(solid), "blocs (hors air)");
+            theme::stat(ui, &theme::thousands(solid), tr("common.solid_blocks"));
         });
         let mut notes = Vec::new();
         if inventory.incomplete_chunks > 0 {
-            notes.push(format!(
-                "{} chunks en bordure de zone, pas entièrement générés, seront ignorés.",
-                theme::thousands(inventory.incomplete_chunks as u64)
+            notes.push(trf(
+                "analysis.incomplete",
+                &[("n", &theme::thousands(inventory.incomplete_chunks as u64))],
             ));
         }
         for (version, n) in &inventory.unsupported {
-            notes.push(format!(
-                "{n} chunks dans un format non pris en charge (DataVersion {version})."
+            notes.push(trf(
+                "analysis.unsupported",
+                &[("n", n), ("version", version)],
             ));
         }
         if inventory.errors > 0 {
-            notes.push(format!("{} chunks illisibles.", inventory.errors));
+            notes.push(trf("analysis.errors", &[("n", &inventory.errors)]));
         }
         if !notes.is_empty() {
             ui.add_space(8.0);
@@ -214,7 +223,7 @@ fn top_blocks(ui: &mut Ui, inventory: &Inventory) {
     let p = Palette::of(ui);
     theme::card(ui).show(ui, |ui| {
         ui.set_width(ui.available_width());
-        theme::section(ui, "Blocs les plus présents", "");
+        theme::section(ui, tr("analysis.top_blocks"), "");
         let sorted = inventory.sorted();
         let total: u64 = sorted
             .iter()
