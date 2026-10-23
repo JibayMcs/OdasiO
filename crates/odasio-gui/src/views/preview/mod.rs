@@ -33,6 +33,7 @@ use crate::theme::{self, Palette};
 use crate::views::mapping::{self, PickTarget, Picker};
 use camera::Camera;
 use gpu::{Gpu, GpuMesh, Uniforms};
+use odasio_core::Selection;
 use stream::{LookTable, MC, Streamer, VS};
 
 /// Ciel (couleur gamma), aussi couleur du brouillard.
@@ -80,6 +81,28 @@ pub struct ViewState {
     selected: Option<Target>,
     /// Boutons cliqués à l'image précédente.
     pending: Option<Input>,
+    /// Mode sélection de la zone à convertir, et rectangle en cours de tracé.
+    select_mode: bool,
+    drag: Option<Drag>,
+    /// Sélection déjà envoyée au GPU.
+    mask_of: Option<Selection>,
+}
+
+impl ViewState {
+    /// Ouvre l'aperçu directement en mode sélection de zone.
+    pub fn open_zone_editor(&mut self) {
+        self.select_mode = true;
+        self.drag = None;
+        self.selected = None;
+    }
+}
+
+/// Rectangle de chunks en cours de tracé.
+#[derive(Clone, Copy)]
+struct Drag {
+    start: (i32, i32),
+    current: (i32, i32),
+    remove: bool,
 }
 
 /// Lance la lecture des assets et de la carte dès qu'un monde est ouvert, pour que l'aperçu
@@ -244,8 +267,9 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
     };
 
     let mut input = app.preview.pending.take().unwrap_or_default();
+    let select_mode = app.preview.select_mode;
     for (side, rect) in [MC, VS].into_iter().zip(rects) {
-        gestures(ui, side, rect, &mut input);
+        gestures(ui, side, rect, select_mode, &mut input);
     }
     frame(app, ui, rects, &input);
 
@@ -275,9 +299,16 @@ struct Input {
     north: bool,
     top_view: bool,
     overview: bool,
+    /// Mode sélection : début (point d'appui) et position courante d'un glisser, fin du
+    /// glisser, retrait (Alt), clic sur un chunk.
+    select_press: Option<[f64; 2]>,
+    select_at: Option<[f64; 2]>,
+    select_release: bool,
+    select_remove: bool,
+    select_click: Option<[f64; 2]>,
 }
 
-fn gestures(ui: &mut Ui, side: usize, rect: Rect, input: &mut Input) {
+fn gestures(ui: &mut Ui, side: usize, rect: Rect, select_mode: bool, input: &mut Input) {
     let response = ui.interact(
         rect,
         ui.id().with(("preview3d", side)),
@@ -292,14 +323,34 @@ fn gestures(ui: &mut Ui, side: usize, rect: Rect, input: &mut Input) {
     if let Some(pos) = response.hover_pos() {
         input.hover = Some((side, relative(pos)));
     }
-    let shift = ui.input(|i| i.modifiers.shift);
-    if response.dragged_by(egui::PointerButton::Primary) && !shift {
-        input.pan += response.drag_delta();
+    let (shift, alt) = ui.input(|i| (i.modifiers.shift, i.modifiers.alt));
+    let primary = response.dragged_by(egui::PointerButton::Primary);
+    if select_mode {
+        // Glisser trace un rectangle de chunks ; le clic molette déplace la vue.
+        if primary && !shift {
+            if response.drag_started()
+                && let Some(origin) = ui.input(|i| i.pointer.press_origin())
+            {
+                input.select_press = Some(relative(origin));
+                input.select_remove = alt;
+            }
+            input.select_at = response.interact_pointer_pos().map(relative);
+        }
+        if response.drag_stopped_by(egui::PointerButton::Primary) {
+            input.select_release = true;
+        }
+        if response.dragged_by(egui::PointerButton::Middle) {
+            input.pan += response.drag_delta();
+        }
+    } else {
+        if primary && !shift {
+            input.pan += response.drag_delta();
+        }
+        if response.dragged_by(egui::PointerButton::Middle) {
+            input.orbit += response.drag_delta();
+        }
     }
-    if response.dragged_by(egui::PointerButton::Secondary)
-        || response.dragged_by(egui::PointerButton::Middle)
-        || (response.dragged_by(egui::PointerButton::Primary) && shift)
-    {
+    if response.dragged_by(egui::PointerButton::Secondary) || (primary && shift) {
         input.orbit += response.drag_delta();
     }
     if response.dragged() {
@@ -313,11 +364,15 @@ fn gestures(ui: &mut Ui, side: usize, rect: Rect, input: &mut Input) {
             input.zoom_at = input.hover;
         }
     }
-    if response.double_clicked() {
+    if response.double_clicked() && !select_mode {
         input.zoom = 0.35;
         input.zoom_at = input.hover;
     } else if response.clicked() {
-        input.clicked = true;
+        if select_mode {
+            input.select_click = input.hover.map(|(_, at)| at);
+        } else {
+            input.clicked = true;
+        }
     }
 }
 
@@ -335,6 +390,57 @@ fn frame(app: &mut OdasioApp, ui: &mut Ui, rects: [Rect; 2], input: &Input) {
     };
     let aspect = (rects[0].width() / rects[0].height()).max(0.1) as f64;
     let dt = ui.input(|i| i.stable_dt).min(0.1) as f64;
+
+    // Zone à convertir : chunk sous un point de la vue.
+    let chunk_at = |engine: &Engine, at: [f64; 2]| {
+        pick(engine, aspect, at).map(|t| (t.x.div_euclid(16), t.z.div_euclid(16)))
+    };
+    if let Some(at) = input.select_press
+        && let Some(start) = chunk_at(engine, at)
+    {
+        view.drag = Some(Drag {
+            start,
+            current: start,
+            remove: input.select_remove,
+        });
+    }
+    if let (Some(drag), Some(at)) = (view.drag.as_mut(), input.select_at)
+        && let Some(current) = chunk_at(engine, at)
+    {
+        drag.current = current;
+    }
+    if input.select_release
+        && let Some(drag) = view.drag.take()
+    {
+        if drag.remove {
+            app.selection.remove_rect(drag.start, drag.current);
+        } else {
+            app.selection.add_rect(drag.start, drag.current);
+        }
+    }
+    if let Some(at) = input.select_click
+        && let Some(chunk) = chunk_at(engine, at)
+    {
+        app.selection.toggle(chunk);
+    }
+    // Masque de sélection : un texel par chunk sur l'emprise du monde.
+    let (bx0, bz0, bx1, bz1) = engine.map.bounds;
+    let mask_origin = (bx0.div_euclid(16), bz0.div_euclid(16));
+    let mask_size = [
+        ((bx1 - bx0) / 16).max(1) as u32,
+        ((bz1 - bz0) / 16).max(1) as u32,
+    ];
+    if view.mask_of.as_ref() != Some(&app.selection) {
+        let mut mask = vec![0u8; (mask_size[0] * mask_size[1]) as usize];
+        for &(cx, cz) in &app.selection.chunks {
+            let (x, z) = (cx - mask_origin.0, cz - mask_origin.1);
+            if (0..mask_size[0] as i32).contains(&x) && (0..mask_size[1] as i32).contains(&z) {
+                mask[z as usize * mask_size[0] as usize + x as usize] = 255;
+            }
+        }
+        engine.gpu.set_selection(&rs, mask_size, &mask);
+        view.mask_of = Some(app.selection.clone());
+    }
 
     // Correspondances modifiées : le côté Vintage Story est refait.
     if engine.mapping_rev != mapping_rev {
@@ -497,6 +603,30 @@ fn frame(app: &mut OdasioApp, ui: &mut Ui, rects: [Rect; 2], input: &Input) {
             fog,
         ],
         near_rect: engine.streamer.near_rect,
+        selection: [
+            mask_origin.0 as f32,
+            mask_origin.1 as f32,
+            mask_size[0] as f32,
+            mask_size[1] as f32,
+        ],
+        selection_mode: [
+            if app.selection.is_empty() { 0.0 } else { 1.0 },
+            if view.select_mode { 1.0 } else { 0.0 },
+            match view.drag {
+                Some(d) if d.remove => -1.0,
+                Some(_) => 1.0,
+                None => 0.0,
+            },
+            0.0,
+        ],
+        drag_rect: view.drag.map_or([0.0; 4], |d| {
+            [
+                d.start.0.min(d.current.0) as f32,
+                d.start.1.min(d.current.1) as f32,
+                d.start.0.max(d.current.0) as f32,
+                d.start.1.max(d.current.1) as f32,
+            ]
+        }),
     };
     let ppp = ui.ctx().pixels_per_point();
     let size = |r: Rect| {
@@ -558,7 +688,7 @@ fn frame(app: &mut OdasioApp, ui: &mut Ui, rects: [Rect; 2], input: &Input) {
     }
     // Les boutons agissent à l'image suivante (comme un geste).
     view.pending = Some(actions);
-    if moving || busy || view.pending.as_ref().is_some_and(Input::any) {
+    if moving || busy || view.drag.is_some() || view.pending.as_ref().is_some_and(Input::any) {
         ui.ctx().request_repaint();
     }
 }
@@ -780,7 +910,8 @@ fn controls(ui: &mut Ui, side: usize, rect: Rect, yaw: f64, pitch: f64, input: &
     }
 }
 
-/// Barre du bas : position, bloc survolé ou choisi, et remappage.
+/// Barre du bas : position, bloc survolé ou choisi, et remappage ; ou, en mode sélection,
+/// la zone à convertir.
 fn info_bar(app: &mut OdasioApp, ui: &mut Ui, rect: Rect) {
     let p = Palette::of(ui);
     let target = app
@@ -789,9 +920,13 @@ fn info_bar(app: &mut OdasioApp, ui: &mut Ui, rect: Rect) {
         .clone()
         .or_else(|| app.preview.hovered.clone());
     let selected = app.preview.selected.is_some();
+    let select_mode = app.preview.select_mode;
+    let zone = zone_text(&app.selection);
     let mut open = None;
     let mut clear = None;
     let mut deselect = false;
+    let mut toggle_mode = false;
+    let mut clear_zone = false;
     let frame = egui::Frame::new()
         .fill(p.card)
         .stroke(Stroke::new(1.0_f32, p.border))
@@ -803,8 +938,44 @@ fn info_bar(app: &mut OdasioApp, ui: &mut Ui, rect: Rect) {
             // Ligne centrée verticalement, sans étirer les pastilles.
             ui.add_space((rect.height() - 30.0) / 2.0);
             ui.horizontal(|ui| {
+                // À droite : le mode sélection, toujours accessible.
+                let right = |ui: &mut Ui, toggle_mode: &mut bool, clear_zone: &mut bool| {
+                    let label = if select_mode {
+                        tr("preview.zone_done")
+                    } else {
+                        tr("preview.zone_edit")
+                    };
+                    if theme::primary_button(ui, label, true)
+                        .on_hover_text(tr("preview.zone_hint"))
+                        .clicked()
+                    {
+                        *toggle_mode = true;
+                    }
+                    if select_mode
+                        && !app.selection.is_empty()
+                        && theme::secondary_button(ui, tr("preview.zone_clear")).clicked()
+                    {
+                        *clear_zone = true;
+                    }
+                };
+                if select_mode {
+                    ui.label(RichText::new(&zone).strong().color(p.accent));
+                    ui.add_space(10.0);
+                    ui.label(RichText::new(tr("preview.zone_hint")).color(p.muted));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        right(ui, &mut toggle_mode, &mut clear_zone);
+                    });
+                    return;
+                }
                 let Some(target) = &target else {
+                    if !app.selection.is_empty() {
+                        ui.label(RichText::new(&zone).color(p.accent));
+                        ui.add_space(10.0);
+                    }
                     ui.label(RichText::new(tr("preview.hint")).color(p.muted));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        right(ui, &mut toggle_mode, &mut clear_zone);
+                    });
                     return;
                 };
                 let resolved = app.mapping.resolve(&target.state);
@@ -828,27 +999,37 @@ fn info_bar(app: &mut OdasioApp, ui: &mut Ui, rect: Rect) {
                         .monospace()
                         .color(p.accent),
                 );
-                if selected {
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if theme::secondary_button(ui, tr("preview.deselect")).clicked() {
-                            deselect = true;
-                        }
-                        if resolved.source == Source::Override
-                            && theme::secondary_button(ui, tr("mapping.clear_override")).clicked()
-                        {
-                            clear = Some(target.state.clone());
-                        }
-                        if theme::primary_button(ui, tr("preview.change"), true).clicked() {
-                            open = Some(PickTarget::Block {
-                                state: target.state.to_string(),
-                                name: target.state.name.clone(),
-                            });
-                        }
-                    });
-                }
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    right(ui, &mut toggle_mode, &mut clear_zone);
+                    if !selected {
+                        return;
+                    }
+                    if theme::secondary_button(ui, tr("preview.deselect")).clicked() {
+                        deselect = true;
+                    }
+                    if resolved.source == Source::Override
+                        && theme::secondary_button(ui, tr("mapping.clear_override")).clicked()
+                    {
+                        clear = Some(target.state.clone());
+                    }
+                    if theme::primary_button(ui, tr("preview.change"), true).clicked() {
+                        open = Some(PickTarget::Block {
+                            state: target.state.to_string(),
+                            name: target.state.name.clone(),
+                        });
+                    }
+                });
             });
         });
     });
+    if toggle_mode {
+        app.preview.select_mode = !select_mode;
+        app.preview.drag = None;
+        app.preview.selected = None;
+    }
+    if clear_zone {
+        app.selection = Selection::default();
+    }
     if let Some(target) = open {
         app.mapping_view.picker = Some(Picker {
             target,
@@ -863,5 +1044,20 @@ fn info_bar(app: &mut OdasioApp, ui: &mut Ui, rect: Rect) {
     }
     if deselect {
         app.preview.selected = None;
+    }
+}
+
+/// Résumé de la zone à convertir : tout le monde, ou nombre de chunks et étendue.
+pub fn zone_text(selection: &Selection) -> String {
+    match selection.bounds() {
+        None => tr("preview.zone_all").to_string(),
+        Some((x0, z0, x1, z1)) => trf(
+            "preview.zone_some",
+            &[
+                ("n", &crate::theme::thousands(selection.len() as u64)),
+                ("w", &((x1 - x0 + 1) * 16)),
+                ("h", &((z1 - z0 + 1) * 16)),
+            ],
+        ),
     }
 }

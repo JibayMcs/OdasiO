@@ -16,8 +16,16 @@ struct Uniforms {
     fog: vec4<f32>,
     // Zone détaillée (x0, z0, x1, z1) : le relief lointain y est masqué.
     near_rect: vec4<f32>,
+    // Masque de sélection : chunk du premier texel (x, z) et taille (largeur, hauteur).
+    selection: vec4<f32>,
+    // Zone sélectionnée non vide (x), grille des chunks (y), rectangle en cours : 1 ajout,
+    // -1 retrait, 0 aucun (z).
+    selection_mode: vec4<f32>,
+    // Rectangle en cours, en chunks (x0, z0, x1, z1), bornes incluses.
+    drag_rect: vec4<f32>,
 };
 @group(0) @binding(0) var<uniform> u: Uniforms;
+@group(0) @binding(1) var selection_mask: texture_2d<f32>;
 @group(1) @binding(0) var atlas: texture_2d<f32>;
 @group(1) @binding(1) var atlas_sampler: sampler;
 
@@ -68,6 +76,37 @@ fn fs_main(i: VertexOut) -> @location(0) vec4<f32> {
         base = vec4<f32>(t.rgb * tint, t.a * i.color.a);
     }
     let d = distance(i.world, u.camera.xyz);
+
+    // Zone à convertir : chunks choisis teintés, les autres assombris.
+    let chunk = floor(i.world.xz / 16.0);
+    let accent = vec3<f32>(0.90, 0.40, 0.07);
+    if (u.selection_mode.x > 0.5) {
+        let local = chunk - u.selection.xy;
+        var selected = false;
+        if (local.x >= 0.0 && local.y >= 0.0 && local.x < u.selection.z && local.y < u.selection.w) {
+            selected = textureLoad(selection_mask, vec2<i32>(local), 0).r > 0.5;
+        }
+        if (selected) {
+            base = vec4<f32>(mix(base.rgb, accent, 0.18), base.a);
+        } else {
+            base = vec4<f32>(base.rgb * 0.35, base.a);
+        }
+    }
+    if (u.selection_mode.z != 0.0
+        && chunk.x >= u.drag_rect.x && chunk.x <= u.drag_rect.z
+        && chunk.y >= u.drag_rect.y && chunk.y <= u.drag_rect.w) {
+        let mark = select(vec3<f32>(0.80, 0.08, 0.06), vec3<f32>(0.95, 0.75, 0.15), u.selection_mode.z > 0.0);
+        base = vec4<f32>(mix(base.rgb, mark, 0.45), base.a);
+    }
+    // Grille des chunks, d'épaisseur constante à l'écran.
+    if (u.selection_mode.y > 0.5) {
+        let edge = abs(fract(i.world.xz / 16.0 + 0.5) - 0.5) * 16.0;
+        let width = max(0.08, d * 0.0018);
+        if (min(edge.x, edge.y) < width) {
+            base = vec4<f32>(mix(base.rgb, vec3<f32>(0.0), 0.45), base.a);
+        }
+    }
+
     let f = clamp((d - u.fog.w * 0.45) / (u.fog.w * 0.55), 0.0, 1.0);
     // Cible non sRGB : egui l'affiche telle quelle, on y écrit des couleurs gamma.
     let lit = mix(base.rgb, u.fog.rgb, f * f);
@@ -82,6 +121,9 @@ pub struct Uniforms {
     pub camera: [f32; 4],
     pub fog: [f32; 4],
     pub near_rect: [f32; 4],
+    pub selection: [f32; 4],
+    pub selection_mode: [f32; 4],
+    pub drag_rect: [f32; 4],
 }
 
 pub struct GpuMesh {
@@ -144,11 +186,67 @@ struct Target {
     id: egui::TextureId,
 }
 
+/// Masque de sélection : un texel par chunk (255 = sélectionné).
+struct SelectionMask {
+    size: [u32; 2],
+    texture: wgpu::Texture,
+    view: wgpu::TextureView,
+}
+
+impl SelectionMask {
+    fn new(device: &wgpu::Device, size: [u32; 2]) -> Self {
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("odasio_selection"),
+            size: wgpu::Extent3d {
+                width: size[0],
+                height: size[1],
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::R8Unorm,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+        let view = texture.create_view(&Default::default());
+        Self {
+            size,
+            texture,
+            view,
+        }
+    }
+}
+
+fn uniform_group(
+    device: &wgpu::Device,
+    layout: &wgpu::BindGroupLayout,
+    uniforms: &wgpu::Buffer,
+    mask: &wgpu::TextureView,
+) -> wgpu::BindGroup {
+    device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: Some("odasio_uniforms"),
+        layout,
+        entries: &[
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniforms.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::TextureView(mask),
+            },
+        ],
+    })
+}
+
 pub struct Gpu {
     opaque: wgpu::RenderPipeline,
     translucent: wgpu::RenderPipeline,
     uniforms: wgpu::Buffer,
+    uniform_layout: wgpu::BindGroupLayout,
     uniform_group: wgpu::BindGroup,
+    mask: SelectionMask,
     pub sides: [SideGpu; 2],
     targets: [Option<Target>; 2],
     pub highlight: Option<GpuMesh>,
@@ -170,16 +268,28 @@ impl Gpu {
         });
         let uniform_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("odasio_uniforms"),
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
                 },
-                count: None,
-            }],
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+            ],
         });
         let atlas_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("odasio_atlas"),
@@ -261,14 +371,8 @@ impl Gpu {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        let uniform_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("odasio_uniforms"),
-            layout: &uniform_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: uniforms.as_entire_binding(),
-            }],
-        });
+        let mask = SelectionMask::new(device, [1, 1]);
+        let uniform_group = uniform_group(device, &uniform_layout, &uniforms, &mask.view);
         let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
             label: Some("odasio_atlas"),
             mag_filter: wgpu::FilterMode::Nearest,
@@ -319,11 +423,49 @@ impl Gpu {
             opaque: pipeline(false),
             translucent: pipeline(true),
             uniforms,
+            uniform_layout,
             uniform_group,
+            mask,
             sides: [side(), side()],
             targets: [None, None],
             highlight: None,
         }
+    }
+
+    /// Envoie le masque de sélection (`size[0]` × `size[1]` octets, 255 = chunk choisi).
+    pub fn set_selection(&mut self, rs: &RenderState, size: [u32; 2], mask: &[u8]) {
+        let size = [size[0].max(1), size[1].max(1)];
+        if self.mask.size != size {
+            self.mask = SelectionMask::new(&rs.device, size);
+            self.uniform_group = uniform_group(
+                &rs.device,
+                &self.uniform_layout,
+                &self.uniforms,
+                &self.mask.view,
+            );
+        }
+        if mask.len() < (size[0] * size[1]) as usize {
+            return;
+        }
+        rs.queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &self.mask.texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            mask,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(size[0]),
+                rows_per_image: Some(size[1]),
+            },
+            wgpu::Extent3d {
+                width: size[0],
+                height: size[1],
+                depth_or_array_layers: 1,
+            },
+        );
     }
 
     /// Renvoie l'atlas au GPU s'il a changé.

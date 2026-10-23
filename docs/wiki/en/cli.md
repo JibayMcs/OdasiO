@@ -51,6 +51,7 @@ odasio convert <WORLD> [OPTIONS]
 | `--season <SEASON>` | `cycle` | `cycle`, `spring`, `summer`, `fall` or `winter` |
 | `--game-mode <MODE>` | `creative` | `creative` or `survival` |
 | `--lighting <WHO>` | `odasio` | `odasio` computes the lighting; `game` lets the game do it on first load (superflat only) |
+| `--area <X1,Z1,X2,Z2>` | whole world | Convert only this area, in block coordinates (rounded to 16-block chunks); repeat it for several areas. The world is centred on them |
 | `--template <FILE>` | | Use an existing Vintage Story save as template instead of generating one with the server |
 
 Examples:
@@ -62,6 +63,10 @@ odasio convert ~/.minecraft/saves/Kingdom --name "Kingdom" --world-type standard
 # An island in an endless ocean, always summer, survival
 odasio convert ~/.minecraft/saves/Kingdom --name "Kingdom island" \
   --world-type ocean --season summer --game-mode survival
+
+# Only a city, as an island
+odasio convert ~/.minecraft/saves/Kingdom --name "Kingdom city" \
+  --world-type ocean --area 2400,2050,2655,2305
 
 # The Nether, with basalt as the main rock
 odasio convert ~/.minecraft/saves/Kingdom --dimension minecraft:the_nether \

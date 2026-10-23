@@ -63,6 +63,15 @@ When you arrive, the whole world is visible from above. As you zoom in, the view
 
 The Vintage Story side shows the ocean that OdasiO fills around your map, so you see exactly where the world ends.
 
+### Choosing the area to convert
+
+To convert only part of the world (a city, a build, a few islands), click **Choose the area to convert** at the bottom right. The chunk grid appears on the terrain:
+
+- **drag** to add a rectangle of chunks, **Alt + drag** to remove one, **click** to add or remove a single chunk;
+- the **middle button** moves the view, the wheel zooms and the right button rotates, as usual.
+
+The selected chunks are tinted and everything else is darkened, on both views. The bar shows the number of chunks and the size of the area. **Done selecting** goes back to normal navigation; **Clear all** empties the selection. Only these chunks are converted, and the Vintage Story world is centred on them. Without a selection, the whole world is converted.
+
 ## 5. Options
 
 ![World options](../../images/en-options.png)
@@ -73,6 +82,7 @@ The Vintage Story side shows the ocean that OdasiO fills around your map, so you
 | **Save file** | Where the `.vcdbs` file is written; by default, Vintage Story's saves folder. **Choose...** picks another place. |
 | **Main rock** | The Vintage Story rock that replaces Minecraft stone. Ores and stone variants follow it where the game allows. |
 | **Surrounding terrain** | What Vintage Story generates around your map. **Standard**: the game's terrain, climate, seasons and vegetation, with the sea levels aligned (recommended). **Ocean**: water as far as the eye can see, your world becomes an island. **Superflat**: a flat plain. |
+| **Area to convert** | The whole world, or the chunks chosen in the preview. **Choose in the preview** opens the selection, **Convert everything** clears it. |
 | **Season** | Seasons enabled, or locked on spring, summer, fall or winter. Can be changed later in game with `/worldconfig seasons`. |
 | **Game mode** | Creative or Survival. |
 | **Height and level** | *Automatic* picks the smallest world height that contains your world and aligns the Minecraft sea (Y = 63) with the Vintage Story sea. Untick it to set the height (multiple of 32) and the vertical offset yourself. |

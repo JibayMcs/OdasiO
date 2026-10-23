@@ -134,7 +134,22 @@ enum Command {
         /// Mode de jeu
         #[arg(long, value_enum, default_value_t = GameModeArg::Creative)]
         game_mode: GameModeArg,
+        /// Ne convertit que cette zone, en blocs : x1,z1,x2,z2 (arrondie aux chunks de 16 blocs).
+        /// Répétable pour plusieurs zones.
+        #[arg(long, value_parser = parse_area, allow_hyphen_values = true)]
+        area: Vec<[i32; 4]>,
     },
+}
+
+/// Zone `x1,z1,x2,z2` en coordonnées de blocs.
+fn parse_area(text: &str) -> std::result::Result<[i32; 4], String> {
+    let values: Vec<i32> = text
+        .split(',')
+        .map(|v| v.trim().parse::<i32>())
+        .collect::<std::result::Result<_, _>>()
+        .map_err(|_| format!("zone invalide « {text} » : attendu x1,z1,x2,z2"))?;
+    <[i32; 4]>::try_from(values)
+        .map_err(|_| format!("zone invalide « {text} » : attendu x1,z1,x2,z2"))
 }
 
 #[derive(Clone, Copy, clap::ValueEnum)]
@@ -235,6 +250,7 @@ fn main() -> Result<()> {
             lighting,
             season,
             game_mode,
+            area,
         } => {
             let output = match out {
                 Some(out) => out,
@@ -287,6 +303,11 @@ fn main() -> Result<()> {
                 LightingArg::Odasio => Lighting::Odasio,
                 LightingArg::Game => Lighting::Game,
             };
+            if !area.is_empty() {
+                let selection = odasio_core::Selection::from_block_rects(&area);
+                println!("Zone sélectionnée : {} chunks\n", selection.len());
+                opts.selection = Some(selection);
+            }
             convert(&world, rock.as_deref(), &opts)?;
         }
     }

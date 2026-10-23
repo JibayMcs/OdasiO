@@ -42,6 +42,7 @@ fn start(app: &mut OdasioApp, ctx: &egui::Context) {
     opts.world_type = app.form.world_type;
     opts.season = app.form.season;
     opts.game_mode = app.form.game_mode;
+    opts.selection = (!app.selection.is_empty()).then(|| app.selection.clone());
     let mapping = app.mapping.clone();
 
     app.convert = Some(Task::spawn(ctx, tr("common.preparing"), move |r| {
@@ -88,6 +89,11 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
                     format!("{} ({})", loaded.world.level.name, loaded.dimension),
                 );
                 summary_row(ui, tr("convert.vs_world"), app.form.world_name.clone());
+                summary_row(
+                    ui,
+                    tr("preview.zone"),
+                    crate::views::preview::zone_text(&app.selection),
+                );
                 summary_row(
                     ui,
                     tr("convert.file"),

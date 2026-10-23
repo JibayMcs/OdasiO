@@ -2673,7 +2673,7 @@ dependencies = [
 
 [[package]]
 name = "odasio-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -2685,7 +2685,7 @@ dependencies = [
 
 [[package]]
 name = "odasio-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "odasio-mc",
  "odasio-vs",
@@ -2698,7 +2698,7 @@ dependencies = [
 
 [[package]]
 name = "odasio-gui"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -2727,7 +2727,7 @@ dependencies = [
 
 [[package]]
 name = "odasio-mc"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "fastnbt",
  "flate2",
@@ -2740,7 +2740,7 @@ dependencies = [
 
 [[package]]
 name = "odasio-render"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "image",
@@ -2757,7 +2757,7 @@ dependencies = [
 
 [[package]]
 name = "odasio-vs"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "rusqlite",
  "serde_json",

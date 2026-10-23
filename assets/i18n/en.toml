@@ -128,6 +128,13 @@ picker_hint = "Search: rock granite, planks oak, glass..."
 picker_air = "game:air  (remove the block)"
 
 [preview]
+zone = "Area to convert"
+zone_all = "The whole world"
+zone_some = "{n} chunks selected · {w} × {h} blocks"
+zone_edit = "Choose the area to convert"
+zone_done = "Done selecting"
+zone_clear = "Clear all"
+zone_hint = "Drag: add a rectangle of chunks · Alt + drag: remove · Click: one chunk · Middle click: move"
 title = "Preview"
 loading_assets = "Reading textures from the installed games..."
 loading_map = "Preparing the world map..."
@@ -150,6 +157,9 @@ change = "Change Vintage Story block"
 deselect = "Deselect"
 
 [options]
+zone_hint = "Only these chunks are converted, and the world is centred on them. Without a selection, the whole world is converted."
+zone_edit = "Choose in the preview"
+zone_all = "Convert everything"
 title = "Vintage Story world options"
 subtitle = "The defaults suit most worlds."
 world_name_hint = "As it will appear in the game's world list."

@@ -35,6 +35,7 @@ Before converting, you can fly over **both worlds side by side in 3D**, rendered
 - **Vintage Story to Minecraft**: turn a Vintage Story save into a Minecraft Java world.
 - **Pre-filled block mapping**: every block is rated (*exact*, *equivalent*, *lossy*, *substitute*, *no equivalent*, *unmapped*) and grouped by category. Keep the suggestion, replace a whole group with air or any block of your choice, or override a single block.
 - **Free 3D preview** of both worlds with a shared camera: overview of the whole world, zoom toward the cursor, free rotation and tilt, compass. Far away the terrain comes from a map of the world; up close, the chunks around you load in the background, block by block, with detailed shapes (stairs, fences, doors...).
+- **Convert only what you want**: select chunks in the 3D preview (rectangles, single chunks) and only that area is converted, centred in the new world.
 - **Live remapping**: click a block in the preview, pick its Vintage Story replacement, and the Vintage Story side updates immediately.
 - **Playable result**: block entities (signs with their text, doors, trapdoors, chests, lanterns, farmland, beehives, saplings...), rotations, waterlogged blocks and liquids, and lighting computed by OdasiO so the world looks right on first load.
 - **Choose the world around your map**: Vintage Story terrain (sea levels aligned), endless ocean, or a flat plain. Pick the season (or lock it) and the game mode.

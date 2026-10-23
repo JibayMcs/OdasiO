@@ -22,6 +22,7 @@ use crate::block_entity::{self, BeTemplate};
 use crate::catalog;
 use crate::mapping::Mapping;
 use crate::ocean;
+use crate::selection::Selection;
 
 #[derive(Debug, Error)]
 pub enum ConvertError {
@@ -173,9 +174,16 @@ pub struct ConvertOptions {
     pub lighting: Lighting,
     pub season: Season,
     pub game_mode: GameMode,
+    /// Chunks à convertir ; `None` (ou vide) : tout le monde.
+    pub selection: Option<Selection>,
 }
 
 impl ConvertOptions {
+    /// Sélection effective (une sélection vide vaut tout le monde).
+    fn selection(&self) -> Option<&Selection> {
+        self.selection.as_ref().filter(|s| !s.is_empty())
+    }
+
     pub fn new(output: PathBuf) -> Self {
         Self {
             dimension: "minecraft:overworld".into(),
@@ -189,6 +197,7 @@ impl ConvertOptions {
             lighting: Lighting::Odasio,
             season: Season::Cycle,
             game_mode: GameMode::Creative,
+            selection: None,
         }
     }
 }
@@ -226,7 +235,10 @@ const MAP_CENTER: i64 = (DEFAULT_MAP_SIZE_XZ / 2) as i64;
 /// convertie) est placé au milieu de la carte VS : c'est là que le serveur précharge les
 /// chunks de spawn et que les distances au centre du monde (climat) sont calculées.
 /// L'alignement sur 512 blocs fait correspondre une région MC à 16 x 16 colonnes VS.
-fn origin(world: &World, region_files: &[PathBuf]) -> [i64; 2] {
+fn origin(world: &World, region_files: &[PathBuf], selection: Option<&Selection>) -> [i64; 2] {
+    if let Some(center) = selection.and_then(Selection::center) {
+        return center.map(|c| MAP_CENTER - c.div_euclid(512) * 512);
+    }
     let center = match world.level.spawn {
         Some([x, _, z]) => [x as i64, z as i64],
         None => {
@@ -364,6 +376,9 @@ fn convert_region(
 
     let locations: Vec<_> = region.chunks().collect();
     for loc in locations {
+        if opts.selection().is_some_and(|s| !s.contains(loc.x, loc.z)) {
+            continue;
+        }
         let Some(nbt) = region.read_chunk_nbt(loc)? else {
             continue;
         };
@@ -379,6 +394,12 @@ fn convert_region(
                 continue;
             }
         };
+        if opts
+            .selection()
+            .is_some_and(|s| !s.contains(chunk.x, chunk.z))
+        {
+            continue;
+        }
         result.mc_chunks += 1;
 
         let vs_x = origin[0] + chunk.x as i64 * 16;
@@ -604,7 +625,17 @@ pub fn convert(
         });
     }
     let ids = db.save.block_ids()?;
-    let origin = origin(world, &files);
+    // Avec une sélection, seules les régions qui la touchent sont lues.
+    let files: Vec<PathBuf> = match opts.selection() {
+        Some(selection) => files
+            .into_iter()
+            .filter(|f| {
+                Region::coords_from_name(f).is_some_and(|(rx, rz)| selection.touches_region(rx, rz))
+            })
+            .collect(),
+        None => files,
+    };
+    let origin = origin(world, &files, opts.selection());
     let light_tables = (opts.lighting == Lighting::Odasio).then(|| light_tables(&ids));
     let top_rock = ids
         .get(&format!("game:rock-{}", mapping.settings.rock))
@@ -728,7 +759,12 @@ fn choose_spawn(
     surfaces: &[((u32, u32), u16)],
 ) -> [i32; 3] {
     let column_center = |(cx, cz): (u32, u32)| (cx as i64 * 32 + 16, cz as i64 * 32 + 16);
-    let target = match world.level.spawn {
+    // Le spawn Minecraft, s'il est dans la zone convertie.
+    let spawn = world.level.spawn.filter(|[x, _, z]| {
+        opts.selection()
+            .is_none_or(|s| s.contains(x.div_euclid(16), z.div_euclid(16)))
+    });
+    let target = match spawn {
         Some([x, _, z]) => (origin[0] + x as i64, origin[1] + z as i64),
         None if !surfaces.is_empty() => {
             let n = surfaces.len() as i64;

@@ -160,6 +160,30 @@ pub fn show(app: &mut OdasioApp, ui: &mut Ui) {
                     });
                 });
 
+                let zone = crate::views::preview::zone_text(&app.selection);
+                let mut edit_zone = false;
+                let mut clear_zone = false;
+                row(ui, tr("preview.zone"), tr("options.zone_hint"), |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label(RichText::new(&zone).color(p.accent));
+                        ui.add_space(8.0);
+                        if ui.button(tr("options.zone_edit")).clicked() {
+                            edit_zone = true;
+                        }
+                        if !app.selection.is_empty() && ui.button(tr("options.zone_all")).clicked()
+                        {
+                            clear_zone = true;
+                        }
+                    });
+                });
+                if edit_zone {
+                    app.step = crate::app::Step::Preview;
+                    app.preview.open_zone_editor();
+                }
+                if clear_zone {
+                    app.selection = Default::default();
+                }
+
                 let standard = app.form.world_type.aligns_sea();
                 if standard {
                     let (height, offset) =

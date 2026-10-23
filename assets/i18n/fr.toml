@@ -128,6 +128,13 @@ picker_hint = "Rechercher : rock granite, planks oak, glass..."
 picker_air = "game:air  (supprimer le bloc)"
 
 [preview]
+zone = "Zone à convertir"
+zone_all = "Tout le monde"
+zone_some = "{n} chunks sélectionnés · {w} × {h} blocs"
+zone_edit = "Choisir la zone à convertir"
+zone_done = "Terminer la sélection"
+zone_clear = "Tout effacer"
+zone_hint = "Glisser : ajouter un rectangle de chunks · Alt + glisser : retirer · Clic : un chunk · Clic molette : se déplacer"
 title = "Aperçu"
 loading_assets = "Lecture des textures des jeux installés..."
 loading_map = "Préparation de la carte du monde..."
@@ -150,6 +157,9 @@ change = "Changer le bloc Vintage Story"
 deselect = "Désélectionner"
 
 [options]
+zone_hint = "Seuls ces chunks sont convertis, le monde est centré sur eux. Sans sélection, tout le monde est converti."
+zone_edit = "Choisir dans l'aperçu"
+zone_all = "Tout convertir"
 title = "Options du monde Vintage Story"
 subtitle = "Les valeurs proposées conviennent à la plupart des mondes."
 world_name_hint = "Tel qu'il apparaîtra dans la liste des mondes du jeu."

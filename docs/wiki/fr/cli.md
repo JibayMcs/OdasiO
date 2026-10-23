@@ -49,6 +49,7 @@ odasio convert <MONDE> [OPTIONS]
 | `--season <SAISON>` | `cycle` | `cycle`, `spring`, `summer`, `fall` ou `winter` |
 | `--game-mode <MODE>` | `creative` | `creative` ou `survival` |
 | `--lighting <QUI>` | `odasio` | `odasio` calcule l'éclairage ; `game` laisse le jeu le faire au premier chargement (superflat uniquement) |
+| `--area <X1,Z1,X2,Z2>` | tout le monde | Ne convertit que cette zone, en coordonnées de blocs (arrondie aux chunks de 16 blocs) ; répétable pour plusieurs zones. Le monde est centré sur elles |
 | `--template <FICHIER>` | | Utilise une sauvegarde Vintage Story existante comme modèle au lieu d'en générer une avec le serveur |
 
 Exemples :
@@ -60,6 +61,10 @@ odasio convert ~/.minecraft/saves/Royaume --name "Royaume" --world-type standard
 # Une île dans un océan sans fin, toujours l'été, en survie
 odasio convert ~/.minecraft/saves/Royaume --name "Royaume île" \
   --world-type ocean --season summer --game-mode survival
+
+# Seulement une ville, en île
+odasio convert ~/.minecraft/saves/Royaume --name "Royaume ville" \
+  --world-type ocean --area 2400,2050,2655,2305
 
 # Le Nether, avec du basalte comme roche principale
 odasio convert ~/.minecraft/saves/Royaume --dimension minecraft:the_nether \

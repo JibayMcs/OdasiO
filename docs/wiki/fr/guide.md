@@ -63,6 +63,15 @@ En arrivant, tout le monde est visible du dessus. En zoomant, la vue s'incline d
 
 Le côté Vintage Story montre l'océan qu'OdasiO ajoute autour de votre carte : vous voyez exactement où le monde s'arrête.
 
+### Choisir la zone à convertir
+
+Pour ne convertir qu'une partie du monde (une ville, une construction, quelques îles), cliquez sur **Choisir la zone à convertir** en bas à droite. La grille des chunks apparaît sur le relief :
+
+- **glisser** ajoute un rectangle de chunks, **Alt + glisser** en retire un, un **clic** ajoute ou retire un seul chunk ;
+- le **clic molette** déplace la vue, la molette zoome et le clic droit tourne, comme d'habitude.
+
+Les chunks choisis sont teintés et tout le reste est assombri, sur les deux vues. La barre indique le nombre de chunks et l'étendue de la zone. **Terminer la sélection** revient à la navigation normale ; **Tout effacer** vide la sélection. Seuls ces chunks sont convertis, et le monde Vintage Story est centré sur eux. Sans sélection, tout le monde est converti.
+
 ## 5. Options
 
 ![Options du monde](../../images/fr-options.png)
@@ -73,6 +82,7 @@ Le côté Vintage Story montre l'océan qu'OdasiO ajoute autour de votre carte :
 | **Fichier de sauvegarde** | Où le fichier `.vcdbs` est écrit ; par défaut, le dossier des sauvegardes de Vintage Story. **Choisir...** en désigne un autre. |
 | **Roche principale** | La roche Vintage Story qui remplace la pierre Minecraft. Minerais et variantes de pierre suivent, quand le jeu le permet. |
 | **Terrain environnant** | Ce que Vintage Story génère autour de votre carte. **Standard** : relief, climat, saisons et végétation du jeu, niveaux de la mer alignés (recommandé). **Océan** : de l'eau à perte de vue, votre monde devient une île. **Superflat** : une plaine plate. |
+| **Zone à convertir** | Tout le monde, ou les chunks choisis dans l'aperçu. **Choisir dans l'aperçu** ouvre la sélection, **Tout convertir** la vide. |
 | **Saison** | Saisons actives, ou bloquées sur le printemps, l'été, l'automne ou l'hiver. Modifiable ensuite en jeu avec `/worldconfig seasons`. |
 | **Mode de jeu** | Créatif ou Survie. |
 | **Hauteur et niveau** | *Automatique* choisit la plus petite hauteur de monde qui contient le vôtre et aligne la mer de Minecraft (Y = 63) sur celle de Vintage Story. Décochez pour régler vous-même la hauteur (multiple de 32) et le décalage vertical. |

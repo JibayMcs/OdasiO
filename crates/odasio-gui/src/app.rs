@@ -90,6 +90,8 @@ pub struct OdasioApp {
     pub mapping_rev: u64,
     pub mapping_view: views::mapping::ViewState,
     pub preview: views::preview::ViewState,
+    /// Zone à convertir (vide : tout le monde), choisie dans l'aperçu.
+    pub selection: odasio_core::Selection,
     pub updater: update::Updater,
     /// Accès au GPU (wgpu, partagé avec egui) pour l'aperçu 3D.
     pub render_state: Option<eframe::egui_wgpu::RenderState>,
@@ -117,6 +119,7 @@ impl OdasioApp {
             mapping_rev: 0,
             mapping_view: Default::default(),
             preview: Default::default(),
+            selection: Default::default(),
             updater: {
                 let mut updater = update::Updater::default();
                 updater.start_auto(&cc.egui_ctx);
@@ -191,6 +194,7 @@ impl OdasioApp {
                     dimension,
                 });
                 self.convert = None;
+                self.selection = Default::default();
                 self.start_scan(ctx);
                 views::preview::prefetch(self, ctx);
                 self.step = Step::Analysis;
